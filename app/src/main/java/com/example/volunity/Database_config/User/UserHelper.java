@@ -89,6 +89,20 @@ public class UserHelper {
         );
     }
 
+    // Di dalam kelas UserHelper.java Anda
+    public Cursor queryByEmail(String email) {
+        ensureOpen(); // Pastikan database terbuka
+        return sqLiteDatabase.query(
+                TABLE_NAME,
+                null, // Semua kolom
+                UserDBContract.UserColumns.EMAIL + " = ?", // Klausa seleksi
+                new String[]{email}, // Argumen seleksi
+                null, // No groupBy
+                null, // No having
+                null  // No orderBy
+        );
+    }
+
     /**
      * Inserts a new user record into the database.
      * @param values A ContentValues object containing the user's data.
