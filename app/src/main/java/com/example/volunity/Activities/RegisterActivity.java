@@ -1,0 +1,186 @@
+package com.example.volunity.Activities;
+
+import android.content.ContentValues;
+import android.content.Intent;
+import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Patterns;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+import com.google.android.material.textfield.TextInputEditText;
+import com.example.volunity.R;
+import com.example.volunity.Database_config.User.UserDBContract;
+import com.example.volunity.Database_config.User.UserHelper;
+// import com.example.volunity.Models.User; // User model tidak langsung digunakan di sini, tapi ada
+
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+import org.mindrot.jbcrypt.BCrypt; // Import BCrypt
+
+public class RegisterActivity extends AppCompatActivity {
+
+    private TextInputEditText etName, etEmail, etPhoneNumber, etPassword, etConfirmPassword;
+    private AutoCompleteTextView autoCompleteRole;
+    private Button btnRegister;
+    private TextView tvLoginLink;
+
+    private UserHelper userHelper;
+    private static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_register);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+
+        userHelper = UserHelper.getInstance(this);
+
+        etName = findViewById(R.id.et_name);
+        etEmail = findViewById(R.id.et_email);
+        etPhoneNumber = findViewById(R.id.et_phone_number);
+        etPassword = findViewById(R.id.et_password);
+        etConfirmPassword = findViewById(R.id.et_confirm_password);
+        autoCompleteRole = findViewById(R.id.auto_complete_role);
+        btnRegister = findViewById(R.id.btn_register);
+        tvLoginLink = findViewById(R.id.tv_login_link);
+
+        setupRoleDropdown();
+
+        btnRegister.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                registerUser();
+            }
+        });
+
+        tvLoginLink.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+    }
+
+    private void setupRoleDropdown() {
+        String[] roles = new String[]{"Volunteer", "Organizer"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_menu_popup_item, roles);
+        autoCompleteRole.setAdapter(adapter);
+    }
+
+    private void registerUser() {
+        String name = etName.getText().toString().trim();
+        String email = etEmail.getText().toString().trim();
+        String phoneNumber = etPhoneNumber.getText().toString().trim();
+        String password = etPassword.getText().toString().trim();
+        String confirmPassword = etConfirmPassword.getText().toString().trim();
+        String role = autoCompleteRole.getText().toString().trim();
+
+        // --- Input Validation (Sama seperti sebelumnya) ---
+        if (TextUtils.isEmpty(name)) {
+            etName.setError("Full Name is required");
+            etName.requestFocus();
+            return;
+        }
+        if (TextUtils.isEmpty(email)) {
+            etEmail.setError("Email is required");
+            etEmail.requestFocus();
+            return;
+        }
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            etEmail.setError("Enter a valid email address");
+            etEmail.requestFocus();
+            return;
+        }
+        if (!TextUtils.isEmpty(phoneNumber) && !Patterns.PHONE.matcher(phoneNumber).matches()) {
+            etPhoneNumber.setError("Enter a valid phone number");
+            etPhoneNumber.requestFocus();
+            return;
+        }
+        if (TextUtils.isEmpty(password)) {
+            etPassword.setError("Password is required");
+            etPassword.requestFocus();
+            return;
+        }
+        if (password.length() < 6) {
+            etPassword.setError("Password must be at least 6 characters");
+            etPassword.requestFocus();
+            return;
+        }
+        if (TextUtils.isEmpty(confirmPassword)) {
+            etConfirmPassword.setError("Confirm password is required");
+            etConfirmPassword.requestFocus();
+            return;
+        }
+        if (!password.equals(confirmPassword)) {
+            etConfirmPassword.setError("Passwords do not match");
+            etConfirmPassword.requestFocus();
+            return;
+        }
+        if (TextUtils.isEmpty(role)) {
+            autoCompleteRole.setError("Role is required");
+            autoCompleteRole.requestFocus();
+            return;
+        }
+
+        // --- HASH PASSWORD MENGGUNAKAN BCrypt ---
+        // BCrypt.gensalt() menghasilkan "salt" acak untuk setiap password,
+        // yang sangat penting untuk keamanan.
+        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+
+        // --- Prepare ContentValues for insertion ---
+        ContentValues values = new ContentValues();
+        values.put(UserDBContract.UserColumns.USERNAME, name);
+        values.put(UserDBContract.UserColumns.EMAIL, email);
+        values.put(UserDBContract.UserColumns.PHONE_NUMBER, phoneNumber);
+        values.put(UserDBContract.UserColumns.PASSWORD, hashedPassword); // Simpan password yang sudah di-hash
+        values.put(UserDBContract.UserColumns.ROLE, role);
+        values.put(UserDBContract.UserColumns.CREATED_AT, LocalDateTime.now().format(TIMESTAMP_FORMATTER));
+
+
+        // --- Insert data into database using UserHelper ---
+        userHelper.open();
+        long result = userHelper.insert(values);
+
+        if (result > 0) {
+            Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+        } else {
+            Toast.makeText(this, "Registration failed. Email might already be registered.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        userHelper.open();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        userHelper.close();
+    }
+}
