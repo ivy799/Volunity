@@ -5,7 +5,7 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
-import java.security.Timestamp;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 public class Activity implements Parcelable {

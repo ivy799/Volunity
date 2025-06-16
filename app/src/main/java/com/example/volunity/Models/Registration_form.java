@@ -3,7 +3,8 @@ package com.example.volunity.Models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.security.Timestamp;
+import java.sql.Timestamp;
+
 
 public class Registration_form implements Parcelable {
     private int id;
