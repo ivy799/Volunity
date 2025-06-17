@@ -8,10 +8,11 @@ import com.example.volunity.Database_config.Favorite.FavoriteDBContract;
 import com.example.volunity.Database_config.Province.ProvinceDBContract;
 import com.example.volunity.Database_config.Registration_form.RegistrationFormDBContract;
 import com.example.volunity.Database_config.User.UserDBContract;
+import com.example.volunity.Database_config.UserDetail.UserDetailDBContract;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     public static String DATABASE_NAME = "volunity.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 3;
 
     public DatabaseHelper(android.content.Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -35,6 +36,41 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     UserDBContract.UserColumns.PASSWORD,
                     UserDBContract.UserColumns.ROLE,
                     UserDBContract.UserColumns.CREATED_AT
+            );
+
+    // Contoh SQL_CREATE_TABLE_USER_DETAILS
+    public static final String SQL_CREATE_TABLE_USER_DETAILS =
+            String.format(
+                    "CREATE TABLE %s ("
+                            + "%s INTEGER PRIMARY KEY AUTOINCREMENT, "
+                            + "%s INTEGER UNIQUE NOT NULL, " // USER_ID, biasanya unik untuk detail
+                            + "%s INTEGER NOT NULL, " // CITY_ID
+                            + "%s INTEGER NOT NULL, " // PROVINCE_ID
+                            + "%s TEXT NOT NULL, " // NAME
+                            + "%s TEXT, " // PHOTO_PROFILE (nullable, path/URL)
+                            + "%s TEXT, " // GENDER (nullable, e.g., 'Male', 'Female', 'Other')
+                            + "%s TEXT, " // DATE_OF_BIRTH (nullable, e.g., 'YYYY-MM-DD' format)
+                            + "FOREIGN KEY (%s) REFERENCES %s(%s) ON DELETE CASCADE, " // FK ke users
+                            + "FOREIGN KEY (%s) REFERENCES %s(%s) ON DELETE CASCADE, " // FK ke cities
+                            + "FOREIGN KEY (%s) REFERENCES %s(%s) ON DELETE CASCADE)", // FK ke provinces
+                    UserDetailDBContract.TABLE_NAME,
+                    UserDetailDBContract.UserDetailColums._ID,
+                    UserDetailDBContract.UserDetailColums.USER_ID,
+                    UserDetailDBContract.UserDetailColums.CITY_ID,
+                    UserDetailDBContract.UserDetailColums.PROVINCE_ID,
+                    UserDetailDBContract.UserDetailColums.NAME,
+                    UserDetailDBContract.UserDetailColums.PHOTO_PROFILE,
+                    UserDetailDBContract.UserDetailColums.GENDER,
+                    UserDetailDBContract.UserDetailColums.DATE_OF_BIRTH,
+                    UserDetailDBContract.UserDetailColums.USER_ID,
+                    UserDBContract.TABLE_NAME,
+                    UserDBContract.UserColumns._ID,
+                    UserDetailDBContract.UserDetailColums.CITY_ID,
+                    CityDBContract.TABLE_NAME,
+                    CityDBContract.CityColumns._ID,
+                    UserDetailDBContract.UserDetailColums.PROVINCE_ID,
+                    ProvinceDBContract.TABLE_NAME,
+                    ProvinceDBContract.ProvinceColumns._ID
             );
 
     public static final String SQL_CREATE_TABLE_PROVINCES =
@@ -170,6 +206,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(android.database.sqlite.SQLiteDatabase db) {
         db.execSQL(SQL_CREATE_TABLE_USERS);
+        db.execSQL(SQL_CREATE_TABLE_USER_DETAILS);
         db.execSQL(SQL_CREATE_TABLE_PROVINCES);
         db.execSQL(SQL_CREATE_TABLE_CITIES);
         db.execSQL(SQL_CREATE_TABLE_ACTIVITIES);
@@ -177,14 +214,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_TABLE_FAVORITES);
     }
 
+
     @Override
     public void onUpgrade(android.database.sqlite.SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + UserDBContract.TABLE_NAME);
-        db.execSQL("DROP TABLE IF EXISTS " + ProvinceDBContract.TABLE_NAME);
-        db.execSQL("DROP TABLE IF EXISTS " + CityDBContract.TABLE_NAME);
-        db.execSQL("DROP TABLE IF EXISTS " + ActivityDBContract.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + RegistrationFormDBContract.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + FavoriteDBContract.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + UserDetailDBContract.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + ActivityDBContract.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + CityDBContract.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + UserDBContract.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + ProvinceDBContract.TABLE_NAME);
         onCreate(db);
     }
 
