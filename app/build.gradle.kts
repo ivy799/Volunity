@@ -5,6 +5,9 @@ plugins {
 android {
     namespace = "com.example.volunity"
     compileSdk = 35
+    buildFeatures {
+        viewBinding = true
+    }
 
     defaultConfig {
         applicationId = "com.example.volunity"
@@ -52,4 +55,8 @@ dependencies {
     implementation ("com.squareup.picasso:picasso:2.71828")
     implementation ("com.google.android.material:material:1.9.0")
     implementation ("androidx.core:core-splashscreen:1.0.1")
+    implementation ("com.google.android.material:material:1.12.0")
+    implementation ("androidx.fragment:fragment-ktx:1.8.1")
+    implementation ("androidx.fragment:fragment:1.8.1")
+    implementation ("de.hdodenhof:circleimageview:3.1.0")
 }

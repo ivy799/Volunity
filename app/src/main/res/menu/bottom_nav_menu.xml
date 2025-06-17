@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_kegiatan"
+        android:icon="@drawable/ic_kegiatan"
+        android:title="Kegiatan" />
+    <item
+        android:id="@+id/navigation_profile_organizer"
+        android:icon="@drawable/ic_profile"
+        android:title="Profil" />
+
+
+</menu>
