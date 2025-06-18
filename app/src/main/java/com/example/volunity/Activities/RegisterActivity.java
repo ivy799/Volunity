@@ -6,9 +6,8 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Patterns;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,24 +21,22 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.example.volunity.R;
 import com.example.volunity.Database_config.User.UserDBContract;
 import com.example.volunity.Database_config.User.UserHelper;
-// import com.example.volunity.Models.User; // User model tidak langsung digunakan di sini, tapi ada
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import org.mindrot.jbcrypt.BCrypt; // Import BCrypt
+import org.mindrot.jbcrypt.BCrypt;
 
 public class RegisterActivity extends AppCompatActivity {
 
     private TextInputEditText etName, etEmail, etPhoneNumber, etPassword, etConfirmPassword;
-    private AutoCompleteTextView autoCompleteRole;
-    private Button btnRegister;
+    private CheckBox cbTerms;
+    private TextView btnRegister;
     private TextView tvLoginLink;
 
     private UserHelper userHelper;
+    private String selectedRole;
     private static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,16 +51,30 @@ public class RegisterActivity extends AppCompatActivity {
 
         userHelper = UserHelper.getInstance(this);
 
+        // Ambil role yang dipilih dari SetRoleActivity
+        selectedRole = getIntent().getStringExtra("SELECTED_ROLE");
+        if (selectedRole == null) {
+            selectedRole = "Volunteer"; // Default role jika tidak ada
+        }
+
+        // Untuk set welcoming text:
+        TextView tvWelcoming = findViewById(R.id.welcoming_text);
+        if ("Volunteer".equalsIgnoreCase(selectedRole)) {
+            tvWelcoming.setText("Gabung jadi Relawan!");
+        } else if ("Organizer".equalsIgnoreCase(selectedRole)) {
+            tvWelcoming.setText("Daftarkan Kegiatanmu!");
+        } else {
+            tvWelcoming.setText("Selamat Datang!");
+        }
+
         etName = findViewById(R.id.et_name);
         etEmail = findViewById(R.id.et_email);
         etPhoneNumber = findViewById(R.id.et_phone_number);
         etPassword = findViewById(R.id.et_password);
         etConfirmPassword = findViewById(R.id.et_confirm_password);
-        autoCompleteRole = findViewById(R.id.auto_complete_role);
+        cbTerms = findViewById(R.id.cb_terms);
         btnRegister = findViewById(R.id.btn_register);
         tvLoginLink = findViewById(R.id.tv_login_link);
-
-        setupRoleDropdown();
 
         btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -82,23 +93,16 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
 
-    private void setupRoleDropdown() {
-        String[] roles = new String[]{"Volunteer", "Organizer"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_menu_popup_item, roles);
-        autoCompleteRole.setAdapter(adapter);
-    }
-
     private void registerUser() {
         String name = etName.getText().toString().trim();
         String email = etEmail.getText().toString().trim();
         String phoneNumber = etPhoneNumber.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
         String confirmPassword = etConfirmPassword.getText().toString().trim();
-        String role = autoCompleteRole.getText().toString().trim();
 
-        // --- Input Validation (Sama seperti sebelumnya) ---
+        // Input Validation
         if (TextUtils.isEmpty(name)) {
-            etName.setError("Full Name is required");
+            etName.setError("Nama is required");
             etName.requestFocus();
             return;
         }
@@ -112,7 +116,12 @@ public class RegisterActivity extends AppCompatActivity {
             etEmail.requestFocus();
             return;
         }
-        if (!TextUtils.isEmpty(phoneNumber) && !Patterns.PHONE.matcher(phoneNumber).matches()) {
+        if (TextUtils.isEmpty(phoneNumber)) {
+            etPhoneNumber.setError("Nomor telepon is required");
+            etPhoneNumber.requestFocus();
+            return;
+        }
+        if (!Patterns.PHONE.matcher(phoneNumber).matches()) {
             etPhoneNumber.setError("Enter a valid phone number");
             etPhoneNumber.requestFocus();
             return;
@@ -137,28 +146,24 @@ public class RegisterActivity extends AppCompatActivity {
             etConfirmPassword.requestFocus();
             return;
         }
-        if (TextUtils.isEmpty(role)) {
-            autoCompleteRole.setError("Role is required");
-            autoCompleteRole.requestFocus();
+        if (!cbTerms.isChecked()) {
+            Toast.makeText(this, "Anda harus setuju dengan syarat dan ketentuan", Toast.LENGTH_LONG).show();
             return;
         }
 
-        // --- HASH PASSWORD MENGGUNAKAN BCrypt ---
-        // BCrypt.gensalt() menghasilkan "salt" acak untuk setiap password,
-        // yang sangat penting untuk keamanan.
+        // Hash password menggunakan BCrypt
         String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
 
-        // --- Prepare ContentValues for insertion ---
+        // Prepare ContentValues for insertion
         ContentValues values = new ContentValues();
         values.put(UserDBContract.UserColumns.USERNAME, name);
         values.put(UserDBContract.UserColumns.EMAIL, email);
         values.put(UserDBContract.UserColumns.PHONE_NUMBER, phoneNumber);
-        values.put(UserDBContract.UserColumns.PASSWORD, hashedPassword); // Simpan password yang sudah di-hash
-        values.put(UserDBContract.UserColumns.ROLE, role);
+        values.put(UserDBContract.UserColumns.PASSWORD, hashedPassword);
+        values.put(UserDBContract.UserColumns.ROLE, selectedRole); // Gunakan role yang dipilih
         values.put(UserDBContract.UserColumns.CREATED_AT, LocalDateTime.now().format(TIMESTAMP_FORMATTER));
 
-
-        // --- Insert data into database using UserHelper ---
+        // Insert data into database using UserHelper
         userHelper.open();
         long result = userHelper.insert(values);
 
@@ -173,6 +178,15 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        // Kembali ke SetRoleActivity saat tombol back ditekan
+        Intent intent = new Intent(RegisterActivity.this, SetRoleActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         userHelper.open();
@@ -182,5 +196,13 @@ public class RegisterActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         userHelper.close();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (userHelper != null && userHelper.isOpen()) {
+            userHelper.close();
+        }
     }
 }

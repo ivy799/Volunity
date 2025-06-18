@@ -24,11 +24,12 @@ import com.example.volunity.Database_config.User.UserMappingHelper;
 import com.example.volunity.Models.User;
 
 import org.mindrot.jbcrypt.BCrypt;
+import org.w3c.dom.Text;
 
 public class LoginActivity extends AppCompatActivity {
 
     private TextInputEditText etLoginEmail, etLoginPassword;
-    private Button btnLogin;
+    private TextView btnLogin;
     private TextView tvRegisterLink;
 
     private UserHelper userHelper;
@@ -61,7 +62,8 @@ public class LoginActivity extends AppCompatActivity {
         tvRegisterLink.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+                // Arahkan ke SetRoleActivity terlebih dahulu
+                Intent intent = new Intent(LoginActivity.this, SetRoleActivity.class);
                 startActivity(intent);
             }
         });
@@ -100,7 +102,6 @@ public class LoginActivity extends AppCompatActivity {
             if (cursor != null) {
                 cursor.close();
             }
-            // Penutupan database di onPause() sudah cukup jika UserHelper dikelola oleh siklus hidup Activity
         }
 
         if (user != null) {
@@ -109,11 +110,8 @@ public class LoginActivity extends AppCompatActivity {
             if (passwordMatches) {
                 Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show();
 
-                // --- KODE BARU UNTUK MENERUSKAN ID PENGGUNA ---
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                intent.putExtra("USER_ID", user.getId()); // Meneruskan ID pengguna yang login
-                // --- AKHIR KODE BARU ---
-
+                intent.putExtra("USER_ID", user.getId());
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 finish();
@@ -132,21 +130,18 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Pastikan database terbuka saat Activity resume
         userHelper.open();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        // Pastikan database tertutup saat Activity pause
         userHelper.close();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Fallback untuk menutup database jika Activity dihancurkan
         if (userHelper != null && userHelper.isOpen()) {
             userHelper.close();
         }
