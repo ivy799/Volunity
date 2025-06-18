@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.volunity.Activities.LoginActivity;
 import com.example.volunity.Activities.RegisterActivity;
+import com.example.volunity.Activities.SetRoleActivity;
 import com.example.volunity.R;
 
 public class Landing3Activity extends AppCompatActivity {
@@ -50,7 +51,7 @@ public class Landing3Activity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Navigate to Register Activity
-                Intent intent = new Intent(Landing3Activity.this, RegisterActivity.class);
+                Intent intent = new Intent(Landing3Activity.this, SetRoleActivity.class);
                 startActivity(intent);
             }
         });

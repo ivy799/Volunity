@@ -3,10 +3,13 @@ package com.example.volunity.Activities;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,9 +31,11 @@ import org.w3c.dom.Text;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private TextInputEditText etLoginEmail, etLoginPassword;
+    private EditText etLoginEmail, etLoginPassword;
     private TextView btnLogin;
     private TextView tvRegisterLink;
+    private ImageView ivTogglePassword;
+    private boolean isPasswordVisible = false;
 
     private UserHelper userHelper;
 
@@ -51,6 +56,24 @@ public class LoginActivity extends AppCompatActivity {
         etLoginPassword = findViewById(R.id.et_login_password);
         btnLogin = findViewById(R.id.btn_login);
         tvRegisterLink = findViewById(R.id.tv_register_link);
+
+        ivTogglePassword = findViewById(R.id.iv_toggle_password);
+
+        ivTogglePassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isPasswordVisible) {
+                    etLoginPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                    ivTogglePassword.setImageResource(R.drawable.ic_eye);
+                } else {
+                    etLoginPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                    ivTogglePassword.setImageResource(R.drawable.ic_eye_off);
+                }
+                isPasswordVisible = !isPasswordVisible;
+                etLoginPassword.setSelection(etLoginPassword.getText().length());
+            }
+        });
+
 
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override

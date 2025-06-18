@@ -3,11 +3,14 @@ package com.example.volunity.Activities;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,10 +32,15 @@ import org.mindrot.jbcrypt.BCrypt;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    private TextInputEditText etName, etEmail, etPhoneNumber, etPassword, etConfirmPassword;
+    private EditText etName, etEmail, etPhoneNumber, etPassword, etConfirmPassword;
     private CheckBox cbTerms;
     private TextView btnRegister;
     private TextView tvLoginLink;
+
+    private ImageView ivTogglePassword, ivToggleConfirmPassword;
+
+    private boolean isPasswordVisible = false;
+    private boolean isConfirmPasswordVisible = false;
 
     private UserHelper userHelper;
     private String selectedRole;
@@ -76,20 +84,40 @@ public class RegisterActivity extends AppCompatActivity {
         btnRegister = findViewById(R.id.btn_register);
         tvLoginLink = findViewById(R.id.tv_login_link);
 
-        btnRegister.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                registerUser();
+        // Eye icon
+        ivTogglePassword = findViewById(R.id.iv_toggle_password);
+        ivToggleConfirmPassword = findViewById(R.id.iv_toggle_confirm_password);
+
+        ivTogglePassword.setOnClickListener(view -> {
+            isPasswordVisible = !isPasswordVisible;
+            if (isPasswordVisible) {
+                etPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                ivTogglePassword.setImageResource(R.drawable.ic_eye_off);
+            } else {
+                etPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                ivTogglePassword.setImageResource(R.drawable.ic_eye);
             }
+            etPassword.setSelection(etPassword.getText().length());
         });
 
-        tvLoginLink.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-                startActivity(intent);
-                finish();
+        ivToggleConfirmPassword.setOnClickListener(view -> {
+            isConfirmPasswordVisible = !isConfirmPasswordVisible;
+            if (isConfirmPasswordVisible) {
+                etConfirmPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                ivToggleConfirmPassword.setImageResource(R.drawable.ic_eye_off);
+            } else {
+                etConfirmPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                ivToggleConfirmPassword.setImageResource(R.drawable.ic_eye);
             }
+            etConfirmPassword.setSelection(etConfirmPassword.getText().length());
+        });
+
+        btnRegister.setOnClickListener(v -> registerUser());
+
+        tvLoginLink.setOnClickListener(v -> {
+            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
         });
     }
 
