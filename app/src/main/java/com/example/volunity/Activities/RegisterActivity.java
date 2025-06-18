@@ -92,10 +92,10 @@ public class RegisterActivity extends AppCompatActivity {
             isPasswordVisible = !isPasswordVisible;
             if (isPasswordVisible) {
                 etPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-                ivTogglePassword.setImageResource(R.drawable.ic_eye_off);
+                ivTogglePassword.setImageResource(R.drawable.ic_eye);
             } else {
                 etPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                ivTogglePassword.setImageResource(R.drawable.ic_eye);
+                ivTogglePassword.setImageResource(R.drawable.ic_eye_off);
             }
             etPassword.setSelection(etPassword.getText().length());
         });
