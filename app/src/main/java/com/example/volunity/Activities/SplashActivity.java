@@ -43,7 +43,6 @@ public class SplashActivity extends AppCompatActivity {
 
     private void checkUserStatus() {
         if (preferenceManager.isUserLoggedIn()) {
-            // User sudah login -> langsung ke Home
             String role = preferenceManager.getUserRole();
             Intent intent;
             if ("Volunteer".equalsIgnoreCase(role)) {
