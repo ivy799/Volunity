@@ -6,6 +6,7 @@ public class ActivityDBContract {
     public static String TABLE_NAME = "activities";
 
     public static final class ActivityColumns implements BaseColumns {
+        public static String ORGANIZER_ID = "organizer_id";
         public static String IMAGE = "image";
         public static String TITLE = "title";
         public static String ADDRESS = "address";

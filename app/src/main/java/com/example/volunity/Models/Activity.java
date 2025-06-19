@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 
 public class Activity implements Parcelable {
     private int id;
+    private int organizerId;
     private String image;
     private String title;
     private String address;
@@ -21,8 +22,9 @@ public class Activity implements Parcelable {
     private Timestamp createdAt;
     private Timestamp updatedAt;
 
-    public Activity(int id, String image, String title, String address, int cityId, int provinceId, LocalDateTime date, Integer maxPeople, String description, Timestamp createdAt, Timestamp updatedAt) {
+    public Activity(int id, int organizerId, String image, String title, String address, int cityId, int provinceId, LocalDateTime date, Integer maxPeople, String description, Timestamp createdAt, Timestamp updatedAt) {
         this.id = id;
+        this.organizerId = organizerId;
         this.image = image;
         this.title = title;
         this.address = address;
@@ -37,6 +39,7 @@ public class Activity implements Parcelable {
 
     protected Activity(Parcel in) {
         id = in.readInt();
+        organizerId = in.readInt();
         image = in.readString();
         title = in.readString();
         address = in.readString();
@@ -48,6 +51,29 @@ public class Activity implements Parcelable {
             maxPeople = in.readInt();
         }
         description = in.readString();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
+        dest.writeInt(organizerId);
+        dest.writeString(image);
+        dest.writeString(title);
+        dest.writeString(address);
+        dest.writeInt(cityId);
+        dest.writeInt(provinceId);
+        if (maxPeople == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeInt(maxPeople);
+        }
+        dest.writeString(description);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public static final Creator<Activity> CREATOR = new Creator<Activity>() {
@@ -68,6 +94,14 @@ public class Activity implements Parcelable {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getOrganizerId() {
+        return organizerId;
+    }
+
+    public void setOrganizerId(int organizerId) {
+        this.organizerId = organizerId;
     }
 
     public String getImage() {
@@ -148,27 +182,5 @@ public class Activity implements Parcelable {
 
     public void setUpdatedAt(Timestamp updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeInt(id);
-        dest.writeString(image);
-        dest.writeString(title);
-        dest.writeString(address);
-        dest.writeInt(cityId);
-        dest.writeInt(provinceId);
-        if (maxPeople == null) {
-            dest.writeByte((byte) 0);
-        } else {
-            dest.writeByte((byte) 1);
-            dest.writeInt(maxPeople);
-        }
-        dest.writeString(description);
     }
 }

@@ -12,7 +12,7 @@ import com.example.volunity.Database_config.UserDetail.UserDetailDBContract;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     public static String DATABASE_NAME = "volunity.db";
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
 
     public DatabaseHelper(android.content.Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -103,6 +103,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             String.format(
                     "CREATE TABLE %s ("
                             + "%s INTEGER PRIMARY KEY AUTOINCREMENT, "
+                            + "%s INTEGER NOT NULL, "
                             + "%s TEXT, "
                             + "%s TEXT NOT NULL, "
                             + "%s TEXT NOT NULL, "
@@ -114,9 +115,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                             + "%s TEXT DEFAULT CURRENT_TIMESTAMP, "
                             + "%s TEXT DEFAULT CURRENT_TIMESTAMP, "
                             + "FOREIGN KEY (%s) REFERENCES %s(%s) ON DELETE CASCADE, "
+                            + "FOREIGN KEY (%s) REFERENCES %s(%s) ON DELETE CASCADE, "
                             + "FOREIGN KEY (%s) REFERENCES %s(%s) ON DELETE CASCADE)",
                     ActivityDBContract.TABLE_NAME,
                     ActivityDBContract.ActivityColumns._ID,
+                    ActivityDBContract.ActivityColumns.ORGANIZER_ID,
                     ActivityDBContract.ActivityColumns.IMAGE,
                     ActivityDBContract.ActivityColumns.TITLE,
                     ActivityDBContract.ActivityColumns.ADDRESS,
@@ -127,6 +130,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     ActivityDBContract.ActivityColumns.DESCRIPTION,
                     ActivityDBContract.ActivityColumns.CREATED_AT,
                     ActivityDBContract.ActivityColumns.UPDATED_AT,
+                    ActivityDBContract.ActivityColumns.ORGANIZER_ID,
+                    UserDBContract.TABLE_NAME,
+                    UserDBContract.UserColumns._ID,
                     ActivityDBContract.ActivityColumns.CITY_ID,
                     CityDBContract.TABLE_NAME,
                     CityDBContract.CityColumns._ID,

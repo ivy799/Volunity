@@ -30,6 +30,7 @@ public class ActivityMappingHelper {
 
         while (cursor.moveToNext()) {
             int id = cursor.getInt(cursor.getColumnIndexOrThrow(ActivityDBContract.ActivityColumns._ID));
+            int organizerId = cursor.getInt(cursor.getColumnIndexOrThrow(ActivityDBContract.ActivityColumns.ORGANIZER_ID));
             String image = cursor.getString(cursor.getColumnIndexOrThrow(ActivityDBContract.ActivityColumns.IMAGE));
             String title = cursor.getString(cursor.getColumnIndexOrThrow(ActivityDBContract.ActivityColumns.TITLE));
             String address = cursor.getString(cursor.getColumnIndexOrThrow(ActivityDBContract.ActivityColumns.ADDRESS));
@@ -60,6 +61,7 @@ public class ActivityMappingHelper {
 
             activities.add(new Activity(
                     id,
+                    organizerId,
                     image,
                     title,
                     address,
@@ -89,6 +91,7 @@ public class ActivityMappingHelper {
 
         if (cursor.moveToFirst()) {
             int id = cursor.getInt(cursor.getColumnIndexOrThrow(ActivityDBContract.ActivityColumns._ID));
+            int organizerId = cursor.getInt(cursor.getColumnIndexOrThrow(ActivityDBContract.ActivityColumns.ORGANIZER_ID));
             String image = cursor.getString(cursor.getColumnIndexOrThrow(ActivityDBContract.ActivityColumns.IMAGE));
             String title = cursor.getString(cursor.getColumnIndexOrThrow(ActivityDBContract.ActivityColumns.TITLE));
             String address = cursor.getString(cursor.getColumnIndexOrThrow(ActivityDBContract.ActivityColumns.ADDRESS));
@@ -121,6 +124,7 @@ public class ActivityMappingHelper {
 
             activity = new Activity(
                     id,
+                    organizerId,
                     image,
                     title,
                     address,
