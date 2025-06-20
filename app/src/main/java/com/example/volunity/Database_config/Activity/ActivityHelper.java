@@ -155,10 +155,24 @@ public class ActivityHelper {
      * @param id The ID (as a String) of the activity to delete.
      * @return The number of rows affected.
      */
-    public long deleteById(String id) {
+    // Nama metode ini sudah OK, tapi untuk konsistensi di DetailActivity, bisa juga dinamakan 'delete'
+    public long delete(String id) { // Mengubah nama deleteById menjadi delete
         ensureOpen();
         return sqLiteDatabase.delete(TABLE_NAME,
                 ActivityDBContract.ActivityColumns._ID + " = ?",
                 new String[]{id});
+    }
+
+    public Cursor queryByOrganizerId(int organizerId) {
+        ensureOpen();
+        return sqLiteDatabase.query(
+                TABLE_NAME,
+                null, // All columns
+                ActivityDBContract.ActivityColumns.ORGANIZER_ID + " = ?", // Selection clause
+                new String[]{String.valueOf(organizerId)}, // Selection argument
+                null, // No groupBy
+                null, // No having
+                ActivityDBContract.ActivityColumns.DATE + " ASC" // Order by date ascending
+        );
     }
 }

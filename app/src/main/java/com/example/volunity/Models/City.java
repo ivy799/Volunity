@@ -3,28 +3,35 @@ package com.example.volunity.Models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class City implements Parcelable {
-    private int id;
-    private String name;
-    private int province_id;
+import androidx.annotation.NonNull; // Pastikan ini diimpor jika menggunakan @NonNull
 
-    public City(int id, String name, int province_id) {
+import com.google.gson.annotations.SerializedName;
+
+public class City implements Parcelable {
+    @SerializedName("id")
+    private int id;
+    @SerializedName("province_id")
+    private int provinceId; // Pastikan ini provinceId
+    @SerializedName("name")
+    private String name;
+
+    public City(int id, String name, int provinceId) {
         this.id = id;
         this.name = name;
-        this.province_id = province_id;
+        this.provinceId = provinceId;
     }
 
     protected City(Parcel in) {
         id = in.readInt();
         name = in.readString();
-        province_id = in.readInt();
+        provinceId = in.readInt();
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(id);
         dest.writeString(name);
-        dest.writeInt(province_id);
+        dest.writeInt(provinceId);
     }
 
     @Override
@@ -60,11 +67,18 @@ public class City implements Parcelable {
         this.name = name;
     }
 
-    public int getProvince_id() {
-        return province_id;
+    public int getProvinceId() {
+        return provinceId;
     }
 
-    public void setProvince_id(int province_id) {
-        this.province_id = province_id;
+    public void setProvinceId(int provinceId) {
+        this.provinceId = provinceId;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        // Ini yang PALING PENTING: Mengembalikan nama kota/kabupaten
+        return name;
     }
 }

@@ -61,4 +61,9 @@ dependencies {
     implementation ("androidx.fragment:fragment-ktx:1.8.1")
     implementation ("androidx.fragment:fragment:1.8.1")
     implementation ("de.hdodenhof:circleimageview:3.1.0")
+    implementation ("com.github.yalantis:ucrop:2.2.8")
+    implementation ("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation ("com.google.code.gson:gson:2.10.1")
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
 }

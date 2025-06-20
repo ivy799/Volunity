@@ -144,4 +144,16 @@ public class CityHelper {
                 CityDBContract.CityColumns._ID + " = ?",
                 new String[]{id});
     }
+    public Cursor queryByName(String name) {
+        ensureOpen();
+        return sqLiteDatabase.query(
+                TABLE_NAME,
+                null,
+                CityDBContract.CityColumns.NAME + " = ?",
+                new String[]{name},
+                null,
+                null,
+                null
+        );
+    }
 }

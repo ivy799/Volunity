@@ -123,4 +123,18 @@ public class ProvinceHelper {
                 ProvinceDBContract.ProvinceColumns._ID + " = ?",
                 new String[]{id});
     }
+    public Cursor queryByName(String name) {
+        ensureOpen(); // Pastikan database terbuka sebelum melakukan query
+        String selection = ProvinceDBContract.ProvinceColumns.NAME + " = ?";
+        String[] selectionArgs = {name};
+        return sqLiteDatabase.query(
+                TABLE_NAME, // Nama tabel provinsi Anda
+                null,       // Kolom yang ingin dikembalikan (null = semua kolom)
+                selection,  // Klausa WHERE: mencari baris di mana kolom NAME sama dengan '?'
+                selectionArgs, // Argumen untuk klausa WHERE: mengisi '?' dengan nilai 'name'
+                null,       // Group by
+                null,       // Having
+                null        // Order by
+        );
+    }
 }

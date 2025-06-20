@@ -1,12 +1,14 @@
 package com.example.volunity.Models;
 
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import androidx.annotation.NonNull;
-
 import java.sql.Timestamp;
+import java.time.LocalDate; // PERUBAHAN: Import LocalDate
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException; // Tambahkan ini untuk penanganan parsing
 
 public class Activity implements Parcelable {
     private int id;
@@ -16,13 +18,20 @@ public class Activity implements Parcelable {
     private String address;
     private int cityId;
     private int provinceId;
-    private LocalDateTime date;
+    private LocalDate date; // PERUBAHAN: Ubah tipe data ke LocalDate
     private Integer maxPeople;
     private String description;
     private Timestamp createdAt;
     private Timestamp updatedAt;
 
-    public Activity(int id, int organizerId, String image, String title, String address, int cityId, int provinceId, LocalDateTime date, Integer maxPeople, String description, Timestamp createdAt, Timestamp updatedAt) {
+    // Formatter untuk LocalDate saat menulis/membaca dari Parcel
+    // Gunakan ISO_LOCAL_DATE karena kita sepakat untuk menyimpan tanggal saja
+    private static final DateTimeFormatter DATE_PARCEL_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
+    // Formatter untuk LocalDateTime (createdAt, updatedAt)
+    private static final DateTimeFormatter DATETIME_PARCEL_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+
+
+    public Activity(int id, int organizerId, String image, String title, String address, int cityId, int provinceId, LocalDate date, Integer maxPeople, String description, Timestamp createdAt, Timestamp updatedAt) {
         this.id = id;
         this.organizerId = organizerId;
         this.image = image;
@@ -30,7 +39,7 @@ public class Activity implements Parcelable {
         this.address = address;
         this.cityId = cityId;
         this.provinceId = provinceId;
-        this.date = date;
+        this.date = date; // PERUBAHAN: Sekarang menerima LocalDate
         this.maxPeople = maxPeople;
         this.description = description;
         this.createdAt = createdAt;
@@ -45,12 +54,41 @@ public class Activity implements Parcelable {
         address = in.readString();
         cityId = in.readInt();
         provinceId = in.readInt();
+
+        // PERUBAHAN: Membaca LocalDate dari Parcel sebagai String
+        String dateString = in.readString();
+        if (dateString != null && !dateString.isEmpty()) {
+            try {
+                this.date = LocalDate.parse(dateString, DATE_PARCEL_FORMATTER); // Gunakan DATE_PARCEL_FORMATTER
+            } catch (DateTimeParseException e) {
+                e.printStackTrace(); // Log error jika parsing gagal
+                this.date = null; // Set null atau default value jika terjadi error
+            }
+        } else {
+            this.date = null;
+        }
+
         if (in.readByte() == 0) {
             maxPeople = null;
         } else {
             maxPeople = in.readInt();
         }
         description = in.readString();
+
+        // PERBAIKAN: Menambahkan pembacaan untuk createdAt dan updatedAt
+        long createdAtMillis = in.readLong();
+        if (createdAtMillis != -1) {
+            this.createdAt = new Timestamp(createdAtMillis);
+        } else {
+            this.createdAt = null;
+        }
+
+        long updatedAtMillis = in.readLong();
+        if (updatedAtMillis != -1) {
+            this.updatedAt = new Timestamp(updatedAtMillis);
+        } else {
+            this.updatedAt = null;
+        }
     }
 
     @Override
@@ -62,6 +100,10 @@ public class Activity implements Parcelable {
         dest.writeString(address);
         dest.writeInt(cityId);
         dest.writeInt(provinceId);
+
+        // PERUBAHAN: Menulis LocalDate sebagai String ke Parcel
+        dest.writeString(date != null ? date.format(DATE_PARCEL_FORMATTER) : null); // Gunakan DATE_PARCEL_FORMATTER
+
         if (maxPeople == null) {
             dest.writeByte((byte) 0);
         } else {
@@ -69,6 +111,10 @@ public class Activity implements Parcelable {
             dest.writeInt(maxPeople);
         }
         dest.writeString(description);
+
+        // PERBAIKAN: Menulis Timestamp ke Parcel (sebagai long milliseconds)
+        dest.writeLong(createdAt != null ? createdAt.getTime() : -1);
+        dest.writeLong(updatedAt != null ? updatedAt.getTime() : -1);
     }
 
     @Override
@@ -88,6 +134,8 @@ public class Activity implements Parcelable {
         }
     };
 
+    // --- Getters and Setters (Pastikan tipe data sesuai dengan LocalDate) ---
+
     public int getId() {
         return id;
     }
@@ -104,8 +152,9 @@ public class Activity implements Parcelable {
         this.organizerId = organizerId;
     }
 
-    public String getImage() {
-        return image;
+    // getImage() mengembalikan Uri, asumsikan 'image' String adalah URI path
+    public Uri getImage() {
+        return (image != null && !image.isEmpty()) ? Uri.parse(image) : null;
     }
 
     public void setImage(String image) {
@@ -144,11 +193,13 @@ public class Activity implements Parcelable {
         this.provinceId = provinceId;
     }
 
-    public LocalDateTime getDate() {
+    // PERUBAHAN: Mengembalikan LocalDate
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(LocalDateTime date) {
+    // PERUBAHAN: Menerima LocalDate
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 

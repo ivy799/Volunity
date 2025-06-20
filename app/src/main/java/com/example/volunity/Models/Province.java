@@ -5,8 +5,12 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Province implements Parcelable {
+    @SerializedName("id")
     private int id;
+    @SerializedName("name")
     private String name;
 
     public Province(int id, String name) {
@@ -56,5 +60,12 @@ public class Province implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(id);
         dest.writeString(name);
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        // Ini yang PALING PENTING: Mengembalikan nama provinsi
+        return name;
     }
 }
