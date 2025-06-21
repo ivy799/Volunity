@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.volunity.Activities.LoginActivity;
 import com.example.volunity.Database_config.User.UserHelper;
 import com.example.volunity.Database_config.User.UserMappingHelper;
 import com.example.volunity.Models.User;
@@ -51,6 +52,22 @@ public class ProfileFragmentOrganizer extends Fragment {
 
         // Panggil method untuk menampilkan data pengguna
         displayUserData();
+
+        // --- KODE BARU: Mengatur Logout pada card_logout ---
+        binding.cardLogout.setOnClickListener(v -> {
+            UiHelper.applyiOSButtonAnimation(v, () -> {
+                // 1. Hapus data login jika Anda menyimpan session di SharedPreferences, tambahkan di sini
+                // Contoh: getContext().getSharedPreferences("login_session", Context.MODE_PRIVATE).edit().clear().apply();
+
+                // 2. Arahkan user ke MainActivity (atau LoginActivity jika ada)
+                Intent intent = new Intent(getActivity(), LoginActivity.class); // Ganti ke LoginActivity jika ada
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // Hapus backstack
+                startActivity(intent);
+
+                // 3. Optional: Tutup fragment/activity ini
+                requireActivity().finish();
+            });
+        });
 
         // --- KODE BARU: Mengatur OnClickListener untuk card_detail ---
         binding.cardDetail.setOnClickListener(v -> {
