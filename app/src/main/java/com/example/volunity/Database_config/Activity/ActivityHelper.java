@@ -175,4 +175,17 @@ public class ActivityHelper {
                 ActivityDBContract.ActivityColumns.DATE + " ASC" // Order by date ascending
         );
     }
+
+    public Cursor searchByNameAndOrganizerId(String name, int organizerId) {
+        ensureOpen();
+        return sqLiteDatabase.query(
+                TABLE_NAME,
+                null, // All columns
+                ActivityDBContract.ActivityColumns.TITLE + " LIKE ? AND " + ActivityDBContract.ActivityColumns.ORGANIZER_ID + " = ?", // Selection clause
+                new String[]{"%" + name + "%", String.valueOf(organizerId)}, // Selection arguments
+                null, // No groupBy
+                null, // No having
+                ActivityDBContract.ActivityColumns.DATE + " ASC" // Order by date ascending
+        );
+    }
 }

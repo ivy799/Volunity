@@ -3,9 +3,12 @@ package com.example.volunity.Fragments;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -39,6 +42,7 @@ public class KegiatanFragmentOrganizer extends Fragment {
     private ActivityHelper activityHelper;
     private UserHelper userHelper;
     private ActivityAdapter activityAdapter;
+    private EditText etSearchActivity;
 
     // --- DEKLARASI HELPER BARU ---
     private CityHelper cityHelper;     // Deklarasi CityHelper
@@ -110,6 +114,7 @@ public class KegiatanFragmentOrganizer extends Fragment {
         // Inisialisasi CityHelper dan ProvinceHelper terlebih dahulu
         cityHelper = CityHelper.getInstance(requireContext());
         provinceHelper = ProvinceHelper.getInstance(requireContext());
+        etSearchActivity = binding.etSearchActivity; // Pastikan ada EditText dengan id ini di layout
 
         // Inisialisasi ActivityAdapter dengan passing semua parameter yang diperlukan
         activityAdapter = new ActivityAdapter(requireContext(), cityHelper, provinceHelper);
@@ -139,6 +144,29 @@ public class KegiatanFragmentOrganizer extends Fragment {
                 }
                 startActivity(intent);
             });
+        });
+
+        etSearchActivity.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Tidak perlu
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Panggil logika pencarian setiap kali teks berubah
+                String keyword = s.toString().trim();
+                if (keyword.isEmpty()) {
+                    loadActivityList(); // Tampilkan semua jika kosong
+                } else {
+                    searchActivityByName(keyword);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // Tidak perlu
+            }
         });
     }
 
@@ -188,6 +216,30 @@ public class KegiatanFragmentOrganizer extends Fragment {
             }
         } catch (Exception e) {
             showError("Gagal memuat daftar aktivitas: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void searchActivityByName(String keyword) {
+        if (!activityHelper.isOpen()) {
+            showError("Database aktivitas belum siap.");
+            return;
+        }
+        if (currentUserId == -1) {
+            showError("ID organizer tidak valid untuk pencarian aktivitas.");
+            activityAdapter.setData(new ArrayList<>());
+            return;
+        }
+
+        try (Cursor cursor = activityHelper.searchByNameAndOrganizerId(keyword, currentUserId)) {
+            ArrayList<Activity> list = ActivityMappingHelper.mapCursorToArrayList(cursor);
+            activityAdapter.setData(list);
+
+            if (list.isEmpty()) {
+                Toast.makeText(requireContext(), "Tidak ditemukan kegiatan dengan nama: " + keyword, Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            showError("Gagal melakukan pencarian: " + e.getMessage());
             e.printStackTrace();
         }
     }
