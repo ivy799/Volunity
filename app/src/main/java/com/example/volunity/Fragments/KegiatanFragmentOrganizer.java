@@ -45,12 +45,12 @@ public class KegiatanFragmentOrganizer extends Fragment {
     private EditText etSearchActivity;
 
     // --- DEKLARASI HELPER BARU ---
-    private CityHelper cityHelper;     // Deklarasi CityHelper
-    private ProvinceHelper provinceHelper; // Deklarasi ProvinceHelper
-    // --- AKHIR DEKLARASI HELPER BARU ---
+    private CityHelper cityHelper;
+    private ProvinceHelper provinceHelper;
 
     private static final String ARG_USER_ID = "user_id";
     private int currentUserId = -1; // Variabel untuk menyimpan ID pengguna yang sedang login
+    private String currentUserRole = "";
 
     public static KegiatanFragmentOrganizer newInstance(int userId) {
         Bundle args = new Bundle();
@@ -75,8 +75,7 @@ public class KegiatanFragmentOrganizer extends Fragment {
         initViews();
         initDatabase();
         initListeners();
-        loadUserData(); // Untuk memuat data detail pengguna, bukan aktivitasnya
-        loadActivityList(); // Ini akan memuat aktivitas berdasarkan currentUserId
+
 
         return binding.getRoot();
     }
@@ -84,55 +83,44 @@ public class KegiatanFragmentOrganizer extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        // --- BUKA HELPER DI ONRESUME ---
         activityHelper.open();
-        userHelper.open();     // Pastikan userHelper juga dibuka
-        cityHelper.open();     // Buka CityHelper
-        provinceHelper.open(); // Buka ProvinceHelper
-        // --- AKHIR BUKA HELPER DI ONRESUME ---
-
-        // Penting: Muat ulang aktivitas setiap kali fragment "aktif" kembali
+        userHelper.open();
+        cityHelper.open();
+        provinceHelper.open();
+        loadUserData();
         loadActivityList();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        // --- TUTUP HELPER DI ONDESTROYVIEW ---
         if (userHelper != null) userHelper.close();
         if (activityHelper != null) activityHelper.close();
-        if (cityHelper != null) cityHelper.close();     // Tutup CityHelper
-        if (provinceHelper != null) provinceHelper.close(); // Tutup ProvinceHelper
-        // --- AKHIR TUTUP HELPER DI ONDESTROYVIEW ---
+        if (cityHelper != null) cityHelper.close();
+        if (provinceHelper != null) provinceHelper.close();
         binding = null;
     }
 
     private void initViews() {
         fabAddActivity = binding.fabAddActivity;
 
-        // --- PERBAIKAN PENTING DI SINI ---
-        // Inisialisasi CityHelper dan ProvinceHelper terlebih dahulu
         cityHelper = CityHelper.getInstance(requireContext());
         provinceHelper = ProvinceHelper.getInstance(requireContext());
-        etSearchActivity = binding.etSearchActivity; // Pastikan ada EditText dengan id ini di layout
+        etSearchActivity = binding.etSearchActivity;
 
-        // Inisialisasi ActivityAdapter dengan passing semua parameter yang diperlukan
+
         activityAdapter = new ActivityAdapter(requireContext(), cityHelper, provinceHelper);
-        // --- AKHIR PERBAIKAN PENTING ---
+
 
         binding.rvActivities.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.rvActivities.setAdapter(activityAdapter);
 
-        // Opsional: Tambahkan TextView di layout Anda (misal: dengan id tv_no_activities_message)
-        // untuk menampilkan pesan jika tidak ada aktivitas.
-        // binding.tvNoActivitiesMessage.setVisibility(View.GONE); // Sembunyikan secara default
     }
 
     private void initDatabase() {
         userHelper = UserHelper.getInstance(requireContext());
-        // activityHelper diinisialisasi di onViewCreated
-        activityHelper = ActivityHelper.getInstance(requireContext()); // Pastikan ini juga ada jika belum
-        // Note: Helper dibuka di onResume, bukan di initDatabase
+        activityHelper = ActivityHelper.getInstance(requireContext());
+
     }
 
     private void initListeners() {
@@ -140,7 +128,7 @@ public class KegiatanFragmentOrganizer extends Fragment {
             UiHelper.applyiOSButtonAnimation(v, () -> {
                 Intent intent = new Intent(getActivity(), AddActivity.class);
                 if (currentUserId != -1) {
-                    intent.putExtra("USER_ID", currentUserId); // Kirim ID organizer ke AddActivity
+                    intent.putExtra("USER_ID", currentUserId);
                 }
                 startActivity(intent);
             });
@@ -154,10 +142,10 @@ public class KegiatanFragmentOrganizer extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // Panggil logika pencarian setiap kali teks berubah
+
                 String keyword = s.toString().trim();
                 if (keyword.isEmpty()) {
-                    loadActivityList(); // Tampilkan semua jika kosong
+                    loadActivityList();
                 } else {
                     searchActivityByName(keyword);
                 }
@@ -175,8 +163,8 @@ public class KegiatanFragmentOrganizer extends Fragment {
             showError("ID pengguna tidak ditemukan.");
             return;
         }
-        // UserHelper akan dibuka di onResume
-        if (!userHelper.isOpen()) { // Pastikan userHelper sudah dibuka sebelum digunakan
+
+        if (!userHelper.isOpen()) {
             showError("Database pengguna belum siap.");
             return;
         }
@@ -184,8 +172,9 @@ public class KegiatanFragmentOrganizer extends Fragment {
             if (cursor != null && cursor.moveToFirst()) {
                 User user = UserMappingHelper.mapCursorToObject(cursor);
                 if (user != null) {
-                    // Data pengguna berhasil dimuat. Anda bisa menampilkan info user di UI jika perlu.
-                    // Contoh: binding.tvWelcomeMessage.setText("Selamat datang, " + user.getName());
+                    currentUserRole = user.getRole();
+                    System.out.println(currentUserRole);
+                    updateFabVisibility();
                 } else {
                     showError("Detail pengguna tidak ditemukan.");
                 }
@@ -195,28 +184,44 @@ public class KegiatanFragmentOrganizer extends Fragment {
         }
     }
 
+    private void updateFabVisibility() {
+        if ("volunteer".equalsIgnoreCase(currentUserRole)) {
+            fabAddActivity.setVisibility(View.GONE);
+        } else {
+            fabAddActivity.setVisibility(View.VISIBLE);
+        }
+    }
+
     private void loadActivityList() {
-        // ActivityHelper akan dibuka di onResume
-        if (!activityHelper.isOpen()) { // Pastikan activityHelper sudah dibuka sebelum digunakan
+
+        if (!activityHelper.isOpen()) {
             showError("Database aktivitas belum siap.");
             return;
         }
         if (currentUserId == -1) {
             showError("ID organizer tidak valid untuk memuat aktivitas.");
-            activityAdapter.setData(new ArrayList<>()); // Kosongkan daftar jika ID tidak valid
+            activityAdapter.setData(new ArrayList<>());
             return;
         }
 
-        try (Cursor cursor = activityHelper.queryByOrganizerId(currentUserId)) {
+        Cursor cursor = null;
+        try {
+            if ("volunteer".equalsIgnoreCase(currentUserRole)) {
+                cursor = activityHelper.queryAll();
+            } else {
+                cursor = activityHelper.queryByOrganizerId(currentUserId);
+            }
             ArrayList<Activity> list = ActivityMappingHelper.mapCursorToArrayList(cursor);
             activityAdapter.setData(list);
 
             if (list.isEmpty()) {
-                Toast.makeText(requireContext(), "Belum ada kegiatan yang Anda buat.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "Tidak ada kegiatan yang tersedia.", Toast.LENGTH_SHORT).show();
             }
         } catch (Exception e) {
             showError("Gagal memuat daftar aktivitas: " + e.getMessage());
             e.printStackTrace();
+        } finally {
+            if (cursor != null) cursor.close();
         }
     }
 

@@ -1,5 +1,7 @@
 package com.example.volunity.Activities;
 
+import static androidx.core.content.ContextCompat.startActivity;
+
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -133,11 +135,19 @@ public class LoginActivity extends AppCompatActivity {
             if (passwordMatches) {
                 Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show();
 
-                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                Intent intent;
+                // Periksa role user
+                if ("Volunteer".equalsIgnoreCase(user.getRole())) {
+                    intent = new Intent(LoginActivity.this, VolunteerActivity2.class);
+                } else {
+                    intent = new Intent(LoginActivity.this, MainActivity.class);
+                }
+
                 intent.putExtra("USER_ID", user.getId());
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 finish();
+
             } else {
                 Toast.makeText(this, "Invalid email or password.", Toast.LENGTH_LONG).show();
                 etLoginPassword.setError("Incorrect password");
