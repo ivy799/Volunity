@@ -1,14 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Fragments.VolunteerFragment">
+    android:background="#F2F2F7"
+    android:id="@+id/nav_host_fragment_content_home_volunteer"
+    tools:context=".Activities.MainActivity">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <!-- Root container for the volunteer home screen -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp">
 
-</FrameLayout>
+        <!-- Header (profile + notification) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/iv_user_profile"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_circle_light_blue"
+                android:padding="8dp"
+                android:src="@drawable/ic_profile"
+                android:contentDescription="User Profile Icon"
+                app:tint="@color/white" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Halo Relawan!"
+                    android:textSize="16sp"
+                    android:textColor="#3C3C43"
+                    android:textStyle="normal" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Universitas Hasanuddin"
+                    android:textSize="18sp"
+                    android:textColor="#000000"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/iv_notifications"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:padding="8dp"
+                android:src="@drawable/ic_notification"
+                android:contentDescription="Notifications Icon" />
+        </LinearLayout>
+
+        <!-- Search bar (moved up after removing status summary) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:background="@drawable/rounded_search_background"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="8dp">
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="8dp"
+                android:src="@drawable/ic_search"
+                android:contentDescription="Search Icon" />
+
+            <EditText
+                android:id="@+id/etSearchActivity"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:autofillHints=""
+                android:background="@android:color/transparent"
+                android:hint="Cari kegiatan..."
+                android:inputType="text"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:textColorHint="#8E8E93" />
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/ic_clear"
+                android:contentDescription="Clear Search Icon" />
+        </LinearLayout>
+
+        <!-- List of volunteer activities -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_activities"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="16dp"
+            android:layout_weight="1"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/item_activity" />
+    </LinearLayout>
+
+    <!-- Floating button to add new volunteer activity -->
+
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

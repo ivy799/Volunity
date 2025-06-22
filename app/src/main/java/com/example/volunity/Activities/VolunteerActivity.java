@@ -31,9 +31,9 @@ public class VolunteerActivity extends AppCompatActivity {
             @Override
             public void onNavigationItemReselected(@NonNull MenuItem item) {
                 int itemId = item.getItemId();
-                if (itemId == R.id.Home){
+                if (itemId == R.id.home){
                     loadFragment(VolunteerFragment.newInstance(loggedInUserId));
-                }else if(itemId == R.id.Favorite){
+                }else if(itemId == R.id.favorite){
                     loadFragment(VolunteerFavFragment.newInstance(loggedInUserId));
                 }
             }

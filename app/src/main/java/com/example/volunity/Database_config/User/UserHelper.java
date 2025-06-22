@@ -126,6 +126,23 @@ public class UserHelper {
                 new String[]{id});
     }
 
+    public int updateUserProfile(int userId, String name, String email, String phone) {
+        ensureOpen(); // Pastikan database terbuka
+        ContentValues values = new ContentValues();
+        values.put(UserDBContract.UserColumns.USERNAME, name);
+        values.put(UserDBContract.UserColumns.EMAIL, email);
+        values.put(UserDBContract.UserColumns.PHONE_NUMBER, phone);
+        // Gunakan sqLiteDatabase, bukan db
+        return sqLiteDatabase.update(
+                UserDBContract.TABLE_NAME,
+                values,
+                UserDBContract.UserColumns._ID + " = ?",
+                new String[]{String.valueOf(userId)}
+        );
+    }
+
+
+
     /**
      * Deletes a user record from the database by their ID.
      * @param id The ID of the user to delete.

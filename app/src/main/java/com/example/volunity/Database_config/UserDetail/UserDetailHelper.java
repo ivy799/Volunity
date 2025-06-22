@@ -10,6 +10,9 @@ import com.example.volunity.Database_config.DatabaseHelper; // Pastikan ini adal
 import com.example.volunity.Database_config.User.UserDBContract; // Untuk referensi Foreign Key USER_ID
 import com.example.volunity.Database_config.City.CityDBContract; // Untuk referensi Foreign Key CITY_ID
 import com.example.volunity.Database_config.Province.ProvinceDBContract; // Untuk referensi Foreign Key PROVINCE_ID
+import com.example.volunity.Models.UserDetail;
+
+import java.text.ParseException;
 
 
 public class UserDetailHelper {
@@ -158,5 +161,70 @@ public class UserDetailHelper {
         return sqLiteDatabase.delete(TABLE_NAME,
                 UserDetailDBContract.UserDetailColums.USER_ID + " = ?",
                 new String[]{String.valueOf(userId)});
+    }
+
+    public UserDetail searchByUserId(int userId) throws ParseException {
+        ensureOpen();
+        UserDetail userDetails = null;
+        Cursor cursor = sqLiteDatabase.query(
+                TABLE_NAME,
+                null,
+                "user_id = ?",
+                new String[]{String.valueOf(userId)},
+                null, null, null
+        );
+        if (cursor != null && cursor.moveToFirst()) {
+            userDetails = UserDetailMappingHelper.mapCursorToObject(cursor);
+            cursor.close();
+        }
+        return userDetails;
+    }
+
+    public boolean existsForUserId(int userId) {
+        ensureOpen();
+        Cursor cursor = sqLiteDatabase.query(
+                TABLE_NAME,
+                new String[]{"user_id"},
+                "user_id = ?",
+                new String[]{String.valueOf(userId)},
+                null, null, null
+        );
+        boolean exists = (cursor != null && cursor.moveToFirst());
+        if (cursor != null) cursor.close();
+        return exists;
+    }
+
+    // 3. Insert user_details
+    public long insertUserDetails(UserDetail details) {
+        ensureOpen();
+        ContentValues values = new ContentValues();
+        values.put("user_id", details.getUserId());
+        values.put("name", details.getName());
+        values.put("photo_profile", details.getPhoto_profile());
+        values.put("gender", details.getGender());
+        if (details.getDateOfBirth() != null)
+            values.put("date_of_birth", details.getDateOfBirth().getTime()); // as long
+        values.put("city_id", details.getCityId());
+        values.put("province_id", details.getProvinceId());
+        return sqLiteDatabase.insert(TABLE_NAME, null, values);
+    }
+
+    // 4. Update user_details berdasarkan userId
+    public int updateUserDetails(UserDetail details) {
+        ensureOpen();
+        ContentValues values = new ContentValues();
+        values.put("name", details.getName());
+        values.put("photo_profile", details.getPhoto_profile());
+        values.put("gender", details.getGender());
+        if (details.getDateOfBirth() != null)
+            values.put("date_of_birth", details.getDateOfBirth().getTime());
+        values.put("city_id", details.getCityId());
+        values.put("province_id", details.getProvinceId());
+        return sqLiteDatabase.update(
+                TABLE_NAME,
+                values,
+                "user_id = ?",
+                new String[]{String.valueOf(details.getUserId())}
+        );
     }
 }

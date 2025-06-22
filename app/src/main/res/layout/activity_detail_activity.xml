@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -50,15 +51,26 @@
             android:layout_weight="1" />
 
         <ImageView
-            android:id="@+id/btn_edit"
+            android:id="@+id/btn_like"
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_marginEnd="12dp"
             android:background="@drawable/bg_circle"
             android:padding="10dp"
-            android:src="@drawable/ic_edit"
-            app:tint="#004AAD"
-            android:contentDescription="Tombol Edit" />
+            android:src="@drawable/ic_favorite"
+            app:tint="#D81B60"
+            android:contentDescription="Tombol Like"
+            android:visibility="gone"
+            tools:visibility="visible"/> <ImageView
+        android:id="@+id/btn_edit"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_marginEnd="12dp"
+        android:background="@drawable/bg_circle"
+        android:padding="10dp"
+        android:src="@drawable/ic_edit"
+        app:tint="#004AAD"
+        android:contentDescription="Tombol Edit" />
 
         <ImageView
             android:id="@+id/btn_delete"
@@ -109,6 +121,24 @@
                 android:textStyle="bold"
                 android:textColor="@color/black"
                 android:layout_marginTop="20dp"/>
+            <TextView
+                android:id="@+id/tv_logged_in_user_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="User ID Login: "
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="16dp"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/tv_role"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Role: "
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="16dp"
+                android:textSize="14sp"
+                android:textStyle="bold" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
@@ -194,7 +224,6 @@
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
 
-            <!-- CATEGORY -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -206,6 +235,7 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_marginEnd="8dp"
+                    android:src="@drawable/ic_ask"
                     app:tint="#004AAD"
                     android:contentDescription="Category Icon"/>
                 <com.google.android.material.textfield.TextInputLayout
@@ -228,11 +258,11 @@
                         android:textColor="#1C1C1E"
                         android:textSize="16sp"
                         android:enabled="false"
+                        android:focusable="false"
+                        android:clickable="true"
                         android:inputType="textCapSentences"/>
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
-            <!-- END CATEGORY -->
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
