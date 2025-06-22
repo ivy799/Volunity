@@ -31,6 +31,10 @@ public class UserDetail implements Parcelable {
         gender = in.readString();
     }
 
+    public UserDetail() {
+
+    }
+
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(id);
