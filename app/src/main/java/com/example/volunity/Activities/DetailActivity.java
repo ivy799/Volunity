@@ -46,6 +46,9 @@ public class DetailActivity extends AppCompatActivity {
     private ActivityDetailActivityBinding binding;
     private String currentActivityId;
     private boolean isEditMode = false;
+    private String selectedCategory;
+    private ArrayAdapter<String> categoryAdapter;
+    private List<String> categoryList;
 
     private List<Province> provinces;
     private List<City> cities;
@@ -69,6 +72,7 @@ public class DetailActivity extends AppCompatActivity {
         openDatabases();
         loadIntentData();
         setupListeners();
+        setupCategoryView();
         setEditMode(false);
     }
 
@@ -166,6 +170,8 @@ public class DetailActivity extends AppCompatActivity {
                     binding.tvDetailId.setText("Activity ID: " + activity.getId());
                     binding.etNamaKegiatan.setText(activity.getTitle());
                     binding.etDescription.setText(activity.getDescription());
+                    binding.etCategory.setText(activity.getCategory() != null ? activity.getCategory() : "");
+                    selectedCategory = activity.getCategory(); // Simpan untuk update
 
                     // --- Perbaikan: Pastikan tipe data activity.getDate() adalah LocalDate ---
                     if (activity.getDate() != null) {
@@ -180,7 +186,7 @@ public class DetailActivity extends AppCompatActivity {
 
                     if (activity.getImage() != null) {
                         try {
-                            Uri imageUri = activity.getImage();
+                            Uri imageUri = Uri.parse(activity.getImage());
                             binding.etImage.setImageURI(imageUri);
                             binding.uriImage.setText("sumber: " + imageUri.toString());
                             binding.uriImage.setVisibility(android.view.View.VISIBLE);
@@ -359,6 +365,7 @@ public class DetailActivity extends AppCompatActivity {
         binding.etDate.setEnabled(enable);
         binding.etMaxPeople.setEnabled(enable);
         binding.etDescription.setEnabled(enable);
+        binding.etCategory.setEnabled(enable); // Enable saat edit
         binding.btnSimpan.setEnabled(enable);
         binding.etImage.setClickable(enable);
     }
@@ -377,6 +384,11 @@ public class DetailActivity extends AppCompatActivity {
 
         if (namaKegiatan.isEmpty() || address.isEmpty() || dateString.isEmpty() || maxPeopleString.isEmpty() || description.isEmpty() || selectedProvince == null || selectedCity == null) {
             Toast.makeText(this, "Semua field harus diisi dan provinsi/kota harus dipilih!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String category = binding.etCategory.getText().toString().trim();
+        if (category.isEmpty()) {
+            Toast.makeText(this, "Kategori harus dipilih.", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -420,6 +432,7 @@ public class DetailActivity extends AppCompatActivity {
         // --- Akhir perbaikan penyimpanan tanggal ---
         values.put(ActivityDBContract.ActivityColumns.MAX_PEOPLE, maxPeople);
         values.put(ActivityDBContract.ActivityColumns.DESCRIPTION, description);
+        values.put(ActivityDBContract.ActivityColumns.CATEGORY, category);
         values.put(ActivityDBContract.ActivityColumns.PROVINCE_ID, provinceId);
         values.put(ActivityDBContract.ActivityColumns.CITY_ID, cityId);
         if (imageUri != null) {
@@ -531,5 +544,41 @@ public class DetailActivity extends AppCompatActivity {
             Toast.makeText(this, "Gagal memuat daftar kota.", Toast.LENGTH_SHORT).show();
             binding.autoCity.setEnabled(false);
         }
+    }
+
+    private void setupCategoryView() {
+        // Daftar kategori
+        categoryList = new ArrayList<>();
+        categoryList.add("Lingkungan");
+        categoryList.add("Pendidikan");
+        categoryList.add("Kesehatan");
+        categoryList.add("Sosial");
+        categoryList.add("Olahraga");
+        categoryList.add("Teknologi");
+        categoryList.add("Lainnya");
+
+        categoryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categoryList);
+        categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // Mode view (default): tampilkan di EditText (disable)
+        binding.etCategory.setEnabled(false);
+
+        // Saat edit mode, ganti EditText jadi Spinner
+        binding.etCategory.setOnClickListener(v -> {
+            if (isEditMode) {
+                showCategoryDialog();
+            }
+        });
+    }
+
+    private void showCategoryDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Pilih Kategori");
+        builder.setSingleChoiceItems(categoryList.toArray(new String[0]), categoryList.indexOf(binding.etCategory.getText().toString()), (dialog, which) -> {
+            selectedCategory = categoryList.get(which);
+            binding.etCategory.setText(selectedCategory);
+            dialog.dismiss();
+        });
+        builder.show();
     }
 }

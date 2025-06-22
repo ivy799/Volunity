@@ -85,16 +85,18 @@ public class ActivityMappingHelper {
             String dateString = cursor.getString(cursor.getColumnIndexOrThrow(ActivityDBContract.ActivityColumns.DATE));
             int maxPeople = cursor.getInt(cursor.getColumnIndexOrThrow(ActivityDBContract.ActivityColumns.MAX_PEOPLE));
             String description = cursor.getString(cursor.getColumnIndexOrThrow(ActivityDBContract.ActivityColumns.DESCRIPTION));
+
+            // Tambahkan di bawah description:
+            String category = cursor.getString(cursor.getColumnIndexOrThrow(ActivityDBContract.ActivityColumns.CATEGORY));
+
             String createdAt = cursor.getString(cursor.getColumnIndexOrThrow(ActivityDBContract.ActivityColumns.CREATED_AT));
             String updatedAt = cursor.getString(cursor.getColumnIndexOrThrow(ActivityDBContract.ActivityColumns.UPDATED_AT));
 
-            // Perubahan: Gunakan sanitizeActivityDate untuk field 'date'
             LocalDate activityDate = sanitizeActivityDate(dateString);
-            // Perubahan: Gunakan sanitizeCreatedAtUpdatedAt untuk created_at dan updated_at
             Timestamp createdAtTimestamp = toTimestamp(createdAt);
             Timestamp updatedAtTimestamp = toTimestamp(updatedAt);
 
-
+            // Pastikan konstruktor Activity menerima parameter category
             return new Activity(
                     id,
                     organizerId,
@@ -103,14 +105,15 @@ public class ActivityMappingHelper {
                     address,
                     cityId,
                     provinceId,
-                    activityDate, // Perubahan: Pastikan konstruktor Activity menerima LocalDate
+                    activityDate,
                     maxPeople,
                     description,
+                    category, // <-- TAMBAHKAN DI SINI
                     createdAtTimestamp,
                     updatedAtTimestamp
             );
         } catch (Exception e) {
-            e.printStackTrace(); // jika ada error mapping
+            e.printStackTrace();
             return null;
         }
     }

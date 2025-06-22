@@ -6,16 +6,18 @@
     android:layout_height="match_parent"
     android:background="@color/white"
     android:padding="16dp"
-    tools:context=".Activities.AddActivity">
+    tools:context=".Activities.DetailActivity">
 
     <LinearLayout
         android:id="@+id/navbar"
-        android:layout_width="0dp" android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
+
         <ImageView
             android:id="@+id/arrow_back"
             android:layout_width="35dp"
@@ -25,24 +27,28 @@
             android:src="@drawable/ic_arrow_left"
             app:tint="#004AAD"
             android:contentDescription="Tombol kembali" />
+
         <View
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_weight="1" />
+
         <TextView
             android:id="@+id/text_profile_header"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Activity / Event"
+            android:text="Detail Kegiatan"
             android:textColor="#004AAD"
             android:layout_weight="1"
             android:layout_marginStart="70dp"
             android:textSize="16sp"
             android:textStyle="bold"/>
+
         <View
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_weight="1" />
+
         <ImageView
             android:id="@+id/btn_edit"
             android:layout_width="35dp"
@@ -52,7 +58,8 @@
             android:padding="10dp"
             android:src="@drawable/ic_edit"
             app:tint="#004AAD"
-            android:contentDescription="Tombol kembali" />
+            android:contentDescription="Tombol Edit" />
+
         <ImageView
             android:id="@+id/btn_delete"
             android:layout_width="35dp"
@@ -61,7 +68,7 @@
             android:padding="10dp"
             android:src="@drawable/ic_delete"
             app:tint="#004AAD"
-            android:contentDescription="Tombol kembali" />
+            android:contentDescription="Tombol Hapus" />
     </LinearLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -72,6 +79,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent">
+
         <LinearLayout
             android:id="@+id/dataActivity"
             android:layout_width="match_parent"
@@ -122,7 +130,9 @@
                     android:textColor="#1C1C1E"
                     android:textSize="16sp"
                     android:inputType="textCapSentences"
-                    android:enabled="false" /> </com.google.android.material.textfield.TextInputLayout>
+                    android:enabled="false" />
+            </com.google.android.material.textfield.TextInputLayout>
+
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -164,7 +174,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:hint="address"
+                    android:hint="Alamat"
                     app:boxBackgroundMode="outline"
                     app:boxCornerRadiusTopStart="12dp"
                     app:boxCornerRadiusTopEnd="12dp"
@@ -180,8 +190,49 @@
                         android:textColor="#1C1C1E"
                         android:textSize="16sp"
                         android:inputType="textCapSentences"
-                        android:enabled="false" /> </com.google.android.material.textfield.TextInputLayout>
+                        android:enabled="false" />
+                </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
+
+            <!-- CATEGORY -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="8dp"
+                android:layout_marginTop="16dp">
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="8dp"
+                    app:tint="#004AAD"
+                    android:contentDescription="Category Icon"/>
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Kategori"
+                    app:boxBackgroundMode="outline"
+                    app:boxCornerRadiusTopStart="12dp"
+                    app:boxCornerRadiusTopEnd="12dp"
+                    app:boxCornerRadiusBottomStart="12dp"
+                    app:boxCornerRadiusBottomEnd="12dp"
+                    app:boxStrokeColor="#007AFF"
+                    app:hintTextColor="#8E8E93">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_category"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="12dp"
+                        android:textColor="#1C1C1E"
+                        android:textSize="16sp"
+                        android:enabled="false"
+                        android:inputType="textCapSentences"/>
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+            <!-- END CATEGORY -->
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -227,7 +278,8 @@
                         android:padding="12dp"
                         android:textColor="#1C1C1E"
                         android:textSize="16sp"
-                        android:enabled="false" /> </com.google.android.material.textfield.TextInputLayout>
+                        android:enabled="false" />
+                </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
             <LinearLayout
                 android:layout_width="match_parent"
@@ -264,7 +316,8 @@
                         android:padding="12dp"
                         android:textColor="#1C1C1E"
                         android:textSize="16sp"
-                        android:enabled="false" /> </com.google.android.material.textfield.TextInputLayout>
+                        android:enabled="false" />
+                </com.google.android.material.textfield.TextInputLayout>
 
             </LinearLayout>
             <LinearLayout
@@ -302,7 +355,8 @@
                         android:textSize="16sp"
                         android:focusable="false"
                         android:clickable="true"
-                        android:enabled="false" /> </com.google.android.material.textfield.TextInputLayout>
+                        android:enabled="false" />
+                </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
             <LinearLayout
                 android:layout_width="match_parent"
@@ -338,7 +392,8 @@
                         android:textColor="#1C1C1E"
                         android:textSize="16sp"
                         android:inputType="number"
-                        android:enabled="false" /> </com.google.android.material.textfield.TextInputLayout>
+                        android:enabled="false" />
+                </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
             <LinearLayout
                 android:layout_width="match_parent"
@@ -378,8 +433,10 @@
                         android:maxLines="8"
                         android:scrollbars="vertical"
                         android:inputType="textCapSentences|textMultiLine"
-                        android:enabled="false" /> </com.google.android.material.textfield.TextInputLayout>
+                        android:enabled="false" />
+                </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
+
             <Button
                 android:id="@+id/btn_simpan"
                 android:layout_width="200dp"
@@ -395,7 +452,7 @@
                 android:fontFamily="sans-serif-medium"
                 android:letterSpacing="0.05"
                 app:cornerRadius="16dp"
-                android:enabled="false"/> </LinearLayout>
+                android:enabled="false"/>
+        </LinearLayout>
     </androidx.core.widget.NestedScrollView>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

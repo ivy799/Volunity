@@ -15,6 +15,7 @@ public class ActivityDBContract {
         public static String DATE = "date";
         public static String MAX_PEOPLE = "max_people";
         public static String DESCRIPTION = "description";
+        public static String CATEGORY = "category";
         public static String CREATED_AT = "created_at";
         public static String UPDATED_AT = "updated_at";
     }

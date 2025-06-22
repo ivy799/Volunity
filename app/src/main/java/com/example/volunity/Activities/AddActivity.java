@@ -71,6 +71,10 @@ public class AddActivity extends AppCompatActivity {
     private CityHelper cityHelper;
     private ActivityHelper activityHelper;
 
+    private android.widget.Spinner spinnerCategory;
+    private ArrayAdapter<String> categoryAdapter;
+    private String selectedCategory;
+
     private Calendar calendar;
     // Ubah menjadi LocalDate jika hanya ingin tanggal tanpa waktu sama sekali di memori
     // Atau tetap LocalDateTime tapi gunakan LocalDate.atStartOfDay() untuk default waktu
@@ -86,6 +90,7 @@ public class AddActivity extends AppCompatActivity {
         activityHelper = ActivityHelper.getInstance(this);
 
         setupBinding();
+        setupCategorySpinner();
         setupPermission();
         setupGalleryLauncher();
         setupPermissionRequester();
@@ -283,12 +288,12 @@ public class AddActivity extends AppCompatActivity {
         String image = (selectedImageUri != null) ? selectedImageUri.toString() : null;
         String title = binding.etNamaKegiatan.getText().toString().trim();
         String address = binding.etAddress.getText().toString().trim();
-        // Simpan LocalDate sebagai String (ISO 8601, e.g., "2025-06-21")
         String dateStringForDb = (selectedDate != null) ? selectedDate.toString() : null;
         Integer maxPeople = binding.etMaxPeople.getText().toString().trim().isEmpty() ? null
                 : Integer.parseInt(binding.etMaxPeople.getText().toString().trim());
         String description = binding.etDescription.getText().toString().trim();
         String cityName = binding.autoCity.getText().toString().trim();
+
 
         int cityId = -1;
         int provinceId = -1;
@@ -312,6 +317,7 @@ public class AddActivity extends AppCompatActivity {
         values.put(ActivityDBContract.ActivityColumns.DATE, dateStringForDb); // Menggunakan ISO 8601 LocalDate String
         values.put(ActivityDBContract.ActivityColumns.MAX_PEOPLE, maxPeople);
         values.put(ActivityDBContract.ActivityColumns.DESCRIPTION, description);
+        values.put(ActivityDBContract.ActivityColumns.CATEGORY, selectedCategory);
         values.put(ActivityDBContract.ActivityColumns.CITY_ID, cityId);
         values.put(ActivityDBContract.ActivityColumns.PROVINCE_ID, provinceId);
         values.put(ActivityDBContract.ActivityColumns.CREATED_AT, LocalDateTime.now().toString()); // Tetap LocalDateTime untuk timestamp
@@ -505,5 +511,35 @@ public class AddActivity extends AppCompatActivity {
         });
 
         d.show();
+    }
+
+    private void setupCategorySpinner() {
+        spinnerCategory = findViewById(R.id.spinner_category);
+
+        // List kategori, bisa diambil dari resource, API, atau hardcode:
+        List<String> categories = new ArrayList<>();
+        categories.add("Lingkungan");
+        categories.add("Pendidikan");
+        categories.add("Kesehatan");
+        categories.add("Sosial");
+        categories.add("Olahraga");
+        categories.add("Teknologi");
+        categories.add("Lainnya");
+
+        categoryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categories);
+        categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerCategory.setAdapter(categoryAdapter);
+
+        // Ambil value saat dipilih
+        spinnerCategory.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
+                selectedCategory = parent.getItemAtPosition(position).toString();
+            }
+            @Override
+            public void onNothingSelected(android.widget.AdapterView<?> parent) {
+                selectedCategory = null;
+            }
+        });
     }
 }

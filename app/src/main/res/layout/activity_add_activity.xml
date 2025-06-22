@@ -364,6 +364,36 @@
                         android:inputType="textCapSentences|textMultiLine" />
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
+
+            <!-- Tambahkan Spinner Category di bawah Deskripsi -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="8dp"
+                android:layout_marginTop="12dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="8dp"
+                    app:tint="#004AAD"
+                    android:contentDescription="Category Icon"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Kategori"
+                    android:textSize="16sp"
+                    android:textColor="@color/black"
+                    android:layout_marginEnd="8dp"/>
+                <Spinner
+                    android:id="@+id/spinner_category"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:spinnerMode="dropdown"/>
+            </LinearLayout>
             <Button
                 android:id="@+id/btn_submit"
                 android:layout_width="200dp"

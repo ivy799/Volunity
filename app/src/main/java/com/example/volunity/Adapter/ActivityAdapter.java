@@ -69,7 +69,7 @@ public class ActivityAdapter extends RecyclerView.Adapter<ActivityAdapter.ViewHo
         holder.binding.tvTitle.setText("Judul: " + activity.getTitle());
 
         // Memuat gambar menggunakan Glide
-        Uri imageUri = activity.getImage();
+        Uri imageUri = Uri.parse(activity.getImage());
         if (imageUri != null) {
             Glide.with(context)
                     .load(imageUri)

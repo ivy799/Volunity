@@ -12,7 +12,7 @@ import com.example.volunity.Database_config.UserDetail.UserDetailDBContract;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     public static String DATABASE_NAME = "volunity.db";
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 5;
 
     public DatabaseHelper(android.content.Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -112,6 +112,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                             + "%s TEXT NOT NULL, "
                             + "%s INTEGER NOT NULL, "
                             + "%s TEXT, "
+                            + "%s TEXT, "
                             + "%s TEXT DEFAULT CURRENT_TIMESTAMP, "
                             + "%s TEXT DEFAULT CURRENT_TIMESTAMP, "
                             + "FOREIGN KEY (%s) REFERENCES %s(%s) ON DELETE CASCADE, "
@@ -128,6 +129,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     ActivityDBContract.ActivityColumns.DATE,
                     ActivityDBContract.ActivityColumns.MAX_PEOPLE,
                     ActivityDBContract.ActivityColumns.DESCRIPTION,
+                    ActivityDBContract.ActivityColumns.CATEGORY, // <-- Tambahkan di sini!
                     ActivityDBContract.ActivityColumns.CREATED_AT,
                     ActivityDBContract.ActivityColumns.UPDATED_AT,
                     ActivityDBContract.ActivityColumns.ORGANIZER_ID,
