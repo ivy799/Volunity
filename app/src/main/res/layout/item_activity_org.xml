@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/tv_activity_item"
+    android:id="@+id/tv_activity_item2"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
@@ -75,15 +75,5 @@
 
     </LinearLayout>
 
-    <!-- Tombol Favorite -->
-    <ImageView
-        android:clickable="true"
-        android:id="@+id/btn_favorite"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_gravity="center_vertical"
-        android:src="@drawable/ic_favorite"
-        android:contentDescription="Favorite"
-        app:tint="@color/black" />
 
 </LinearLayout>

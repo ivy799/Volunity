@@ -20,6 +20,7 @@ import com.example.volunity.Database_config.Province.ProvinceHelper; // Penting:
 import com.example.volunity.Models.Activity;
 import com.example.volunity.R;
 import com.example.volunity.databinding.ItemActivityBinding;
+import com.example.volunity.databinding.ItemActivityOrgBinding;
 import com.example.volunity.uihelper.UiHelper;
 
 import java.time.LocalDate;
@@ -57,7 +58,7 @@ public class ActivityAdapter extends RecyclerView.Adapter<ActivityAdapter.ViewHo
     @Override
     public ActivityAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        ItemActivityBinding binding = ItemActivityBinding.inflate(inflater, parent, false);
+        ItemActivityOrgBinding binding = ItemActivityOrgBinding.inflate(inflater, parent, false);
         return new ViewHolder(binding);
     }
 
@@ -129,11 +130,10 @@ public class ActivityAdapter extends RecyclerView.Adapter<ActivityAdapter.ViewHo
         }
 
         holder.binding.tvLocate.setText("Lokasi: " + cityName + ", " + provinceName);
-        // --- AKHIR SOLUSI LOKASI ---
 
 
-        holder.binding.tvActivityItem.setOnClickListener(v -> {
-            UiHelper.applyiOSButtonAnimation(holder.binding.tvActivityItem, () -> {
+        holder.binding.tvActivityItem2.setOnClickListener(v -> {
+            UiHelper.applyiOSButtonAnimation(holder.binding.tvActivityItem2, () -> {
                 Intent intent = new Intent(context, DetailActivity.class);
                 intent.putExtra("activity_id", String.valueOf(activity.getId()));
                 context.startActivity(intent);
@@ -147,9 +147,9 @@ public class ActivityAdapter extends RecyclerView.Adapter<ActivityAdapter.ViewHo
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        final ItemActivityBinding binding;
+        final ItemActivityOrgBinding binding;
 
-        public ViewHolder(ItemActivityBinding binding) {
+        public ViewHolder(ItemActivityOrgBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
         }

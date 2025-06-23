@@ -1,5 +1,6 @@
 package com.example.volunity.Adapter;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -7,16 +8,20 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.database.Cursor;
+import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.example.volunity.Activities.DetailActivity2; // Mengarahkan ke DetailActivity2
+import com.example.volunity.Activities.DetailActivity2;
 import com.example.volunity.Database_config.City.CityDBContract;
 import com.example.volunity.Database_config.City.CityHelper;
 import com.example.volunity.Database_config.Province.ProvinceDBContract;
 import com.example.volunity.Database_config.Province.ProvinceHelper;
+import com.example.volunity.Database_config.Favorite.FavoriteHelper;
+import com.example.volunity.Database_config.Favorite.FavoriteDBContract;
 import com.example.volunity.Models.Activity;
 import com.example.volunity.R;
 import com.example.volunity.databinding.ItemActivityBinding;
@@ -24,7 +29,7 @@ import com.example.volunity.uihelper.UiHelper;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException; // Import untuk menangani error parsing
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -32,20 +37,24 @@ public class ActivityAdapter2 extends RecyclerView.Adapter<ActivityAdapter2.View
 
     private ArrayList<Activity> activityList = new ArrayList<>();
     private final Context context;
-    // Format tanggal untuk tampilan
     private final DateTimeFormatter DISPLAY_DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMMM yyyy", new Locale("id", "ID"));
 
-    // Deklarasikan Helper untuk City dan Province
     private final CityHelper cityHelper;
     private final ProvinceHelper provinceHelper;
-    private final int loggedInUserId; // Variabel untuk menyimpan ID pengguna yang login
+    private final int loggedInUserId;
+    private boolean isOrganizer = false;
 
-    // Konstruktor yang menerima userId
+    // Tambahkan setter untuk role
+    public void setIsOrganizer(boolean isOrganizer) {
+        this.isOrganizer = isOrganizer;
+        notifyDataSetChanged();
+    }
+
     public ActivityAdapter2(Context context, CityHelper cityHelper, ProvinceHelper provinceHelper, int loggedInUserId) {
         this.context = context;
         this.cityHelper = cityHelper;
         this.provinceHelper = provinceHelper;
-        this.loggedInUserId = loggedInUserId; // Inisialisasi userId
+        this.loggedInUserId = loggedInUserId;
     }
 
     public void setData(ArrayList<Activity> list) {
@@ -77,7 +86,6 @@ public class ActivityAdapter2 extends RecyclerView.Adapter<ActivityAdapter2.View
             }
         } catch (IllegalArgumentException e) {
             Log.e("ActivityAdapter2", "Invalid URI for activity ID " + activity.getId() + ": " + activity.getImage(), e);
-            // imageUri tetap null, akan memuat placeholder
         }
 
         if (imageUri != null) {
@@ -93,7 +101,6 @@ public class ActivityAdapter2 extends RecyclerView.Adapter<ActivityAdapter2.View
         // Penanganan tanggal
         if (activity.getDate() != null) {
             try {
-                // Pastikan activity.getDate() adalah LocalDate sebelum memformat
                 if (activity.getDate() instanceof LocalDate) {
                     holder.binding.tvDate.setText("Waktu : " + ((LocalDate) activity.getDate()).format(DISPLAY_DATE_FORMATTER));
                 } else {
@@ -112,48 +119,112 @@ public class ActivityAdapter2 extends RecyclerView.Adapter<ActivityAdapter2.View
         String cityName = "N/A";
         String provinceName = "N/A";
 
-        // Pastikan cityHelper dan provinceHelper tidak null dan terbuka
+        // City Name
         if (cityHelper != null) {
-            if (!cityHelper.isOpen()) cityHelper.open(); // Buka jika belum terbuka
+            if (!cityHelper.isOpen()) cityHelper.open();
             try (Cursor cityCursor = cityHelper.search(activity.getCityId())) {
                 if (cityCursor != null && cityCursor.moveToFirst()) {
                     cityName = cityCursor.getString(cityCursor.getColumnIndexOrThrow(CityDBContract.CityColumns.NAME));
-                } else {
-                    Log.w("ActivityAdapter2", "City not found for ID: " + activity.getCityId());
                 }
             } catch (Exception e) {
                 Log.e("ActivityAdapter2", "Error fetching city name for ID " + activity.getCityId() + ": " + e.getMessage());
             }
-        } else {
-            Log.e("ActivityAdapter2", "CityHelper is null. Cannot fetch city name.");
         }
 
+        // Province Name
         if (provinceHelper != null) {
-            if (!provinceHelper.isOpen()) provinceHelper.open(); // Buka jika belum terbuka
+            if (!provinceHelper.isOpen()) provinceHelper.open();
             try (Cursor provinceCursor = provinceHelper.search(activity.getProvinceId())) {
                 if (provinceCursor != null && provinceCursor.moveToFirst()) {
                     provinceName = provinceCursor.getString(provinceCursor.getColumnIndexOrThrow(ProvinceDBContract.ProvinceColumns.NAME));
-                } else {
-                    Log.w("ActivityAdapter2", "Province not found for ID: " + activity.getProvinceId());
                 }
             } catch (Exception e) {
                 Log.e("ActivityAdapter2", "Error fetching province name for ID " + activity.getProvinceId() + ": " + e.getMessage());
             }
-        } else {
-            Log.e("ActivityAdapter2", "ProvinceHelper is null. Cannot fetch province name.");
         }
 
         holder.binding.tvLocate.setText("Lokasi: " + cityName + ", " + provinceName);
 
+        // Detail activity click
         holder.binding.tvActivityItem.setOnClickListener(v -> {
             UiHelper.applyiOSButtonAnimation(holder.binding.tvActivityItem, () -> {
                 Intent intent = new Intent(context, DetailActivity2.class);
                 intent.putExtra("activity_id", String.valueOf(activity.getId()));
-                // Mengirim ID pengguna yang login ke DetailActivity2
                 intent.putExtra("logged_in_user_id", loggedInUserId);
                 context.startActivity(intent);
             });
         });
+
+        // Hide fav button if organizer
+        if (isOrganizer) {
+            holder.binding.btnFavorite.setVisibility(View.GONE);
+        } else {
+            holder.binding.btnFavorite.setVisibility(View.VISIBLE);
+
+            // ---- FAVORITE LOGIC START ----
+            FavoriteHelper favoriteHelper = FavoriteHelper.getInstance(context);
+            if (!favoriteHelper.isOpen()) favoriteHelper.open();
+
+            boolean isFavorited = false;
+            try (Cursor favCursor = favoriteHelper.queryByUserId(loggedInUserId)) {
+                if (favCursor != null && favCursor.moveToFirst()) {
+                    do {
+                        int favActivityId = favCursor.getInt(favCursor.getColumnIndexOrThrow(FavoriteDBContract.FavoriteColumns.ACTIVITIES_ID));
+                        if (favActivityId == activity.getId()) {
+                            isFavorited = true;
+                            break;
+                        }
+                    } while (favCursor.moveToNext());
+                }
+            }
+
+            // Set ikon favorite
+            if (isFavorited) {
+                holder.binding.btnFavorite.setImageResource(R.drawable.ic_favorite); // filled
+            } else {
+                holder.binding.btnFavorite.setImageResource(R.drawable.ic_favorite); // outlined
+            }
+
+            holder.binding.btnFavorite.setOnClickListener(v -> {
+                UiHelper.applyiOSButtonAnimation(holder.binding.btnFavorite, () -> {
+                    if (!favoriteHelper.isOpen()) favoriteHelper.open();
+
+                    boolean currentFavorited = false;
+                    try (Cursor favCursor = favoriteHelper.queryByUserId(loggedInUserId)) {
+                        if (favCursor != null && favCursor.moveToFirst()) {
+                            do {
+                                int favActivityId = favCursor.getInt(favCursor.getColumnIndexOrThrow(FavoriteDBContract.FavoriteColumns.ACTIVITIES_ID));
+                                if (favActivityId == activity.getId()) {
+                                    currentFavorited = true;
+                                    break;
+                                }
+                            } while (favCursor.moveToNext());
+                        }
+                    }
+
+                    if (!currentFavorited) {
+                        ContentValues values = new ContentValues();
+                        values.put(FavoriteDBContract.FavoriteColumns.USER_ID, loggedInUserId);
+                        values.put(FavoriteDBContract.FavoriteColumns.ACTIVITIES_ID, activity.getId());
+                        long result = favoriteHelper.insert(values);
+                        if (result != -1) {
+                            holder.binding.btnFavorite.setImageResource(R.drawable.ic_favorite);
+                            Toast.makeText(context, "Ditambahkan ke Favorit", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(context, "Sudah ada di Favorit", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        long rows = favoriteHelper.deleteByUserIdAndActivityId(loggedInUserId, activity.getId());
+                        if (rows > 0) {
+                            holder.binding.btnFavorite.setImageResource(R.drawable.ic_favorite);
+                            Toast.makeText(context, "Dihapus dari Favorit", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(context, "Gagal menghapus dari Favorit", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            });
+        }
     }
 
     @Override
@@ -163,7 +234,6 @@ public class ActivityAdapter2 extends RecyclerView.Adapter<ActivityAdapter2.View
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         final ItemActivityBinding binding;
-
         public ViewHolder(ItemActivityBinding binding) {
             super(binding.getRoot());
             this.binding = binding;

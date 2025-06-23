@@ -13,7 +13,7 @@ import com.example.volunity.Database_config.Activity.ActivityDBContract; // Need
 public class FavoriteHelper {
     public static final String TABLE_NAME = FavoriteDBContract.TABLE_NAME;
     private static DatabaseHelper databaseHelper;
-    private static SQLiteDatabase sqLiteDatabase;
+    public static SQLiteDatabase sqLiteDatabase;
     public static volatile FavoriteHelper instance;
     private boolean isOpen = false;
 

@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
@@ -74,6 +75,9 @@ public class DetailActivity2 extends AppCompatActivity {
         setupListeners();
         setupCategoryView();
         setEditMode(false);
+        binding.btnEdit.setVisibility(View.GONE);
+        binding.btnDelete.setVisibility(View.GONE);
+        binding.btnSimpan.setVisibility(View.GONE);
     }
 
     private void initBinding() {
@@ -146,8 +150,7 @@ public class DetailActivity2 extends AppCompatActivity {
             String activityId = extras.getString("activity_id");
             loggedInUserId = extras.getInt("logged_in_user_id", -1);
 
-            // Memanggil metode untuk menampilkan ID dan Role pengguna yang login
-            displayLoggedInUserRole(); // Ganti dari displayLoggedInUserId()
+            displayLoggedInUserRole();
 
             if (activityId != null) {
                 currentActivityId = activityId;
@@ -160,9 +163,8 @@ public class DetailActivity2 extends AppCompatActivity {
         }
     }
 
-    // --- METODE BARU UNTUK MENAMPILKAN ID DAN ROLE PENGGUNA YANG LOGIN ---
+
     private void displayLoggedInUserRole() {
-        // Tampilkan ID Pengguna
         if (binding.tvLoggedInUserId != null) {
             if (loggedInUserId != -1) {
                 binding.tvLoggedInUserId.setText("User ID Login: " + loggedInUserId);
@@ -174,8 +176,6 @@ public class DetailActivity2 extends AppCompatActivity {
             Log.e("DetailActivity2", "TextView with id tv_logged_in_user_id not found in layout.");
         }
 
-        // Tampilkan Role Pengguna
-        // Pastikan Anda memiliki TextView dengan ID tv_role di activity_detail_activity.xml
         if (binding.tvRole != null) {
             String userRole = getUserRoleById(loggedInUserId);
             if (userRole != null) {
@@ -188,9 +188,7 @@ public class DetailActivity2 extends AppCompatActivity {
             Log.e("DetailActivity2", "TextView with id tv_role not found in layout.");
         }
     }
-    // --- AKHIR METODE BARU ---
 
-    // Metode untuk mendapatkan peran (role) pengguna dari database
     private String getUserRoleById(int userId) {
         if (!userHelper.isOpen()) {
             Log.e("DetailActivity2", "Database user belum siap saat getUserRoleById.");
@@ -283,8 +281,6 @@ public class DetailActivity2 extends AppCompatActivity {
             displayError("Terjadi kesalahan saat memuat detail aktivitas: " + e.getMessage());
             Log.e("DetailActivity2", "Unexpected error loading activity details for ID: " + activityId, e);
         }
-        // Panggil kembali displayLoggedInUserRole() jika Anda ingin memastikan role muncul
-        // setelah detail aktivitas dimuat, karena mungkin ada kasus lambat load.
         displayLoggedInUserRole();
     }
 

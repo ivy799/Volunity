@@ -40,22 +40,7 @@ import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/**
- * Activity untuk menampilkan dan mengedit detail profil pengguna.
- *
- * PERBAIKAN:
- * 1.  ThreadPool Executor: Menggunakan ExecutorService untuk menjalankan semua operasi I/O
- * (database dan network) di background thread. Ini menjaga UI tetap responsif.
- * 2.  Refactoring: Memecah metode besar seperti onCreate dan loadProvinces menjadi
- * fungsi-fungsi yang lebih kecil dan spesifik.
- * 3.  Manajemen Database yang Aman: Operasi database dibuka dan ditutup dalam blok
- * try-finally di dalam background thread, bukan di onResume/onPause,
- * untuk menghindari kebocoran koneksi.
- * 4.  Alur Data yang Jelas: Memisahkan pemuatan data (loadInitialData) dari pengaturan UI.
- * Data profil dan provinsi dimuat secara paralel.
- * 5.  UI State Management: Menyederhanakan logika untuk mengaktifkan/menonaktifkan mode edit.
- * 6.  Error Handling: Penanganan parseException yang lebih baik.
- */
+
 public class DetailProfileActivity extends AppCompatActivity {
 
     private static final String DOB_FORMAT = "dd-MM-yyyy";
@@ -65,7 +50,6 @@ public class DetailProfileActivity extends AppCompatActivity {
     private UserDetailHelper userDetailsHelper;
     private DatabaseHelper dbHelper;
 
-    // Gunakan ExecutorService untuk operasi background
     private final ExecutorService executor = Executors.newFixedThreadPool(2); // Thread untuk database & network
     private final Handler mainThreadHandler = new Handler(Looper.getMainLooper());
 
@@ -103,29 +87,23 @@ public class DetailProfileActivity extends AppCompatActivity {
         initializeHelpers();
         initializeAdapters();
         setupListeners();
-        loadInitialData(); // Memuat semua data awal
-        setEditMode(false); // Atur state awal UI
+        loadInitialData();
+        setEditMode(false);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        executor.shutdown(); // Matikan executor saat activity hancur
+        executor.shutdown();
         binding = null;
     }
 
-    /**
-     * Inisialisasi semua helper database.
-     */
     private void initializeHelpers() {
         userHelper = UserHelper.getInstance(this);
         userDetailsHelper = UserDetailHelper.getInstance(this);
         dbHelper = new DatabaseHelper(this);
     }
 
-    /**
-     * Inisialisasi ArrayAdapter untuk province dan city.
-     */
     private void initializeAdapters() {
         provinceAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, provinces);
         cityAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, cities);
@@ -133,9 +111,6 @@ public class DetailProfileActivity extends AppCompatActivity {
         binding.autoCity.setAdapter(cityAdapter);
     }
 
-    /**
-     * Pengaturan semua listener untuk view.
-     */
     private void setupListeners() {
         binding.btnEdit.setOnClickListener(v -> toggleEditMode());
         binding.btnSave.setOnClickListener(v -> saveChanges());
@@ -154,10 +129,6 @@ public class DetailProfileActivity extends AppCompatActivity {
                 selectedCity = (City) parent.getItemAtPosition(position));
     }
 
-    /**
-     * Memuat data awal: profil pengguna dan daftar provinsi.
-     * Operasi ini dijalankan di background thread.
-     */
     private void loadInitialData() {
         // Tampilkan loading indicator jika ada
         executor.execute(() -> {
@@ -168,10 +139,6 @@ public class DetailProfileActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Mengambil data user dan user-detail dari database lokal.
-     * Dieksekusi di background thread.
-     */
     private void loadUserProfileFromDB() {
         try {
             userHelper.open();
@@ -188,7 +155,7 @@ public class DetailProfileActivity extends AppCompatActivity {
                 detailCursor.close();
             }
 
-            // Setelah data didapat, update UI di main thread
+
             mainThreadHandler.post(this::populateUserData);
 
         } catch (ParseException e) {
@@ -199,15 +166,11 @@ public class DetailProfileActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Mengambil daftar provinsi dari API.
-     * Dieksekusi di background thread.
-     */
     private void loadProvincesFromApi() {
         new WilayahApiClient().getProvinces(new WilayahApiClient.WilayahApiCallback<Province>() {
             @Override
             public void onSuccess(List<Province> data) {
-                // Proses penyimpanan ke database lokal juga harus di background
+
                 executor.execute(() -> {
                     SQLiteDatabase db = dbHelper.getWritableDatabase();
                     List<Province> localProvinces = new ArrayList<>();
@@ -236,26 +199,22 @@ public class DetailProfileActivity extends AppCompatActivity {
 
     /**
      * Mengambil daftar kota untuk provinsi yang dipilih.
-     * @param province Provinsi yang dipilih.
-     */
-    /**
-     * Mengambil daftar kota untuk provinsi yang dipilih.
-     * @param province Provinsi yang dipilih.
+     @param province Provinsi yang dipilih.
+     @param province Provinsi yang dipilih.
      */
     private void loadCitiesForProvince(Province province) {
         binding.autoCity.setEnabled(false);
         new WilayahApiClient().getCities(String.valueOf(province.getId()), new WilayahApiClient.WilayahApiCallback<City>() {
             @Override
             public void onSuccess(List<City> data) {
-                // Proses penyimpanan ke database lokal juga harus di background
                 executor.execute(()-> {
                     SQLiteDatabase db = dbHelper.getWritableDatabase();
                     List<City> localCities = new ArrayList<>();
                     for (City apiCity : data) {
                         int localId = getOrInsertCity(db, apiCity.getName(), province.getId());
 
-                        // --- PERBAIKAN DI BARIS INI ---
-                        // Urutan argumen disesuaikan menjadi (id, name, provinceId)
+
+
                         localCities.add(new City(localId, apiCity.getName(), province.getId()));
                     }
                     db.close();
@@ -265,7 +224,7 @@ public class DetailProfileActivity extends AppCompatActivity {
                         cities.addAll(localCities);
                         cityAdapter.notifyDataSetChanged();
                         binding.autoCity.setEnabled(true);
-                        // Coba set kota yang sudah tersimpan
+
                         preselectLocation();
                     });
                 });
@@ -273,7 +232,6 @@ public class DetailProfileActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Exception e) {
-                // Log error untuk debugging dengan Tag "API_ERROR"
                 Log.e("API_ERROR", "Gagal memuat data kota: ", e); // <-- TAMBAHKAN BARIS INI
 
                 mainThreadHandler.post(() -> {
@@ -285,14 +243,10 @@ public class DetailProfileActivity extends AppCompatActivity {
         });
     }
 
-
-    /**
-     * Mengisi data pengguna ke dalam view.
-     */
     private void populateUserData() {
         if (currentUser == null) {
             Toast.makeText(this, "Pengguna tidak ditemukan.", Toast.LENGTH_LONG).show();
-            // Tampilkan data kosong atau N/A
+
             binding.tvDetailUsername.setText("N/A");
             binding.tvDetailEmail.setText("N/A");
             binding.tvUsername.setText("N/A");
@@ -307,7 +261,7 @@ public class DetailProfileActivity extends AppCompatActivity {
         binding.tvMail.setText(currentUser.getEmail());
         binding.tvPhoneNumber.setText(currentUser.getPhone_number());
 
-        // Mengisi data untuk mode edit
+
         binding.etUsername.setText(currentUser.getName());
         binding.etEmail.setText(currentUser.getEmail());
         binding.etPhoneNumber.setText(currentUser.getPhone_number());
@@ -325,15 +279,11 @@ public class DetailProfileActivity extends AppCompatActivity {
         preselectLocation();
     }
 
-    /**
-     * Memilih province dan city pada dropdown berdasarkan data yang tersimpan.
-     */
     private void preselectLocation() {
         if (currentUserDetails == null || provinces.isEmpty()) {
             return;
         }
 
-        // Set Provinsi
         if (selectedProvince == null) {
             for (Province p : provinces) {
                 if (p.getId() == currentUserDetails.getProvinceId()) {

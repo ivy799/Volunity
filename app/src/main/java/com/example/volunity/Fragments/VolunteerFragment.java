@@ -2,16 +2,19 @@ package com.example.volunity.Fragments;
 
 import android.database.Cursor;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.volunity.Adapter.ActivityAdapter2; // Menggunakan ActivityAdapter2
+import com.example.volunity.Adapter.ActivityAdapter2;
 import com.example.volunity.Database_config.Activity.ActivityHelper;
 import com.example.volunity.Database_config.City.CityHelper;
 import com.example.volunity.Database_config.Province.ProvinceHelper;
@@ -29,13 +32,14 @@ import com.example.volunity.Database_config.Activity.ActivityDBContract;
 public class VolunteerFragment extends Fragment {
 
     private static final String ARG_USER_ID = "user_id";
-    private int userId; // Ini adalah ID pengguna yang sedang login
-
+    private int userId;
     private RecyclerView rvActivities;
-    private ActivityAdapter2 activityAdapter; // Menggunakan ActivityAdapter2
+    private ActivityAdapter2 activityAdapter;
     private ActivityHelper activityHelper;
     private CityHelper cityHelper;
     private ProvinceHelper provinceHelper;
+    private EditText etSearchActivity;
+
 
     public VolunteerFragment() {
         // Required empty public constructor
@@ -63,6 +67,9 @@ public class VolunteerFragment extends Fragment {
         }
     }
 
+    private ArrayList<Activity> allActivities = new ArrayList<>();
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -71,15 +78,28 @@ public class VolunteerFragment extends Fragment {
         rvActivities = view.findViewById(R.id.rv_activities);
         rvActivities.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Inisialisasi ActivityAdapter2 dan meneruskan userId yang login
+        EditText etSearchActivity = view.findViewById(R.id.etSearchActivity);
+        etSearchActivity.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filterActivities(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
         activityAdapter = new ActivityAdapter2(getContext(), cityHelper, provinceHelper, userId);
         rvActivities.setAdapter(activityAdapter);
 
-        // Memuat data saat view dibuat
         loadActivityData();
 
         return view;
     }
+
 
     private void loadActivityData() {
         ArrayList<Activity> activities = new ArrayList<>();
@@ -87,7 +107,7 @@ public class VolunteerFragment extends Fragment {
 
         try {
             activityHelper.open();
-            activityCursor = activityHelper.queryAll(); // Mengambil semua data aktivitas
+            activityCursor = activityHelper.queryAll();
 
             if (activityCursor != null && activityCursor.moveToFirst()) {
                 do {
@@ -164,10 +184,15 @@ public class VolunteerFragment extends Fragment {
             }
         }
 
-        if (!activities.isEmpty()) {
-            activityAdapter.setData(activities);
+
+        allActivities.clear();
+        allActivities.addAll(activities);
+
+
+        if (etSearchActivity != null && etSearchActivity.getText() != null && etSearchActivity.getText().length() > 0) {
+            filterActivities(etSearchActivity.getText().toString());
         } else {
-            Log.d("VolunteerFragment", "No activities found.");
+            activityAdapter.setData(activities);
         }
     }
 
@@ -194,5 +219,17 @@ public class VolunteerFragment extends Fragment {
         if (activityHelper != null && activityHelper.isOpen()) activityHelper.close();
         if (cityHelper != null && cityHelper.isOpen()) cityHelper.close();
         if (provinceHelper != null && provinceHelper.isOpen()) provinceHelper.close();
+    }
+
+    private void filterActivities(String text) {
+        ArrayList<Activity> filteredList = new ArrayList<>();
+        for (Activity activity : allActivities) {
+            if (activity.getTitle() != null && activity.getTitle().toLowerCase().contains(text.toLowerCase())) {
+                filteredList.add(activity);
+            } else if (activity.getCategory() != null && activity.getCategory().toLowerCase().contains(text.toLowerCase())) {
+                filteredList.add(activity);
+            }
+        }
+        activityAdapter.setData(filteredList);
     }
 }
